@@ -24,7 +24,7 @@ Otherwise:
 
 In any case, the full details will be displayed right below the result message.
 
-For more details about the algorithm used, read [main algorithm](##main-algorithm), or the appropriate article.
+For more details about the algorithm used, read [main algorithm](#main-algorithm), or the appropriate article.
 
 We hope you find this tool useful. For bugs and issues please contact us (see contact page).
 
@@ -51,7 +51,7 @@ times without cleaning the input window, and the system will append the new resu
 
 Matrix-element format examples: `+2.3-i0.2, 3, 5i, -0.2i, 0.6i-3.1, i+0.1`
 
-For exact formatting options see [appendix](##appendix)
+For exact formatting options see [appendix](#appendix-matrix-element-format)
 
 #### Additional restrictions
 The Matrix given is checked to be Hermitian, semi-definite positive, 
@@ -98,7 +98,7 @@ And in choosing the accuracy boost mode will set:
     M = N^3
     R = 1000
 
-Note: for further details read about the algorithm time complexity in [time complexity](##time-complexity)
+Note: for further details read about the algorithm time complexity in [time complexity](#time-complexity)
 
 ## Main algorithm
 
@@ -112,8 +112,8 @@ and the original input matrix, on the separable matrices subspace.
 
 
 The main iteration repeats until either a target distance to original matrix is reached 
-(see [target distance](####target-distance) or until a number of iterations is reached. The heuristic for the maximum
-number of main iterations is `(target-number-of-states)^2` (see [target number of states](####target-number-of-states)).
+(see [target distance](#target-distance) or until a number of iterations is reached. The heuristic for the maximum
+number of main iterations is `(target-number-of-states)^2` (see [target number of states](#target-number-of-states)).
 
 Minimization of the distance between the current best approximation mixed-state matrix, and the original, is 
 reached implementing a quadratic-programming optimization approach. The equation system is solved efficiently using 
@@ -121,7 +121,7 @@ Eigen's LDLT Cholesky's decomposition.
 
 The pure states collection from which the approximation is constructed is optimized by discarding 
 states with probability below the "Minimum probability per state" threshold 
-(see [minimum weight per state](####minimum-weight-per-state)).
+(see [minimum weight per state](#minimum-weight-per-state)).
 
 In each main iteration, the construction of the best candidate pure state to mix-in to our
 approximation matrix is also an iterative numerical process on it's own.
@@ -143,16 +143,16 @@ by Jon Magne Leinaas, Jan Myrheim and Eirik Ovrum.
 
 The input accuracy is very loosely restricted. The floating point calculation of a the data representation
 is limited to 14 significant digits, so entering more than this	is redundant. It is redundant to enter more digits than 
-the output format (see [output accuracy](####output-accuracy)), or than the accuracy of the algorithm itself - 
-6-7 significant digits (see [algorithm accuracy](####algorithm-accuracy)).
+the output format (see [output accuracy](#output-accuracy)), or than the accuracy of the algorithm itself - 
+6-7 significant digits (see [algorithm accuracy](#algorithmcalculation-accuracy)).
 
 #### Output accuracy
 
-This refers to the manual setting of the display format of the output. See [output percision](####output-percision). 
-Setting this will **NOT** affect the calculation time or accuracy (see [algorithm accuracy](####algorithm-accuracy)), 
-but simply **the number of decimal digits displayed**.
+This refers to the manual setting of the display format of the output. See [output percision](#output-percision). 
+Setting this will **NOT** affect the calculation time or accuracy 
+(see [algorithm accuracy](#algorithmcalculation-accuracy)), but simply **the number of decimal digits displayed**.
 
-#### <a name="####algorithm-accuracy">Algorithm/Calculation accuracy
+#### Algorithm/Calculation accuracy
 
 The numerical nature of the algorithm makes defining it's accuracy a not-well-defined problem.
 The representation is only limited to the floating point error (`E-19`) but looking for pure states and tracing out
@@ -168,7 +168,7 @@ parametrized by `q`:
 
 Where `I` is the normalized `4x4` mixed state, and `B` is any of the Bell states.
 For q &lt 1/3 the state is separable, while for q &gt, entangled.
-In it's current optimization settings, using the [*accuracy boost mode*](####accuracy-boost-mode), the system will find a 
+In it's current optimization settings, using the [*accuracy boost mode*](#accuracy-boost-mode), the system will find a 
 separable approximation for `W`, within less than `0.5E-13`, for `q=0.3332` (or less, of course). This means that for 
 this marginal type of matrix, we achieve accuracy of `0.5E-4` in the parameter `q`.
 
@@ -194,12 +194,12 @@ Total time complexity for this phase stands at `O(n * N^2)` and is not the limit
 
 The main algorithm uses several heuristics to limit it's computation time.
 First, the main iteration (how many time do we search for an extra pure-state to mix-in
-with our approximation) is limited by M depending on whether [accuracy boost mode](####accuracy-boost-mode)
+with our approximation) is limited by M depending on whether [accuracy boost mode](#accuracy-boost-mode)
 is chosen, if no other breaking condition is reached. 
 
 Each such iteration requires that we build a new pure-state, which is done in several 
 iterations, each refining the projection vector tensor products.
-The number of iterations here is limited and maximum value is set by the [accuracy boost mode](####accuracy-boost-mode).
+The number of iterations here is limited and maximum value is set by the [accuracy boost mode](#accuracy-boost-mode).
 In which we iterate over the particles (n), projecting the traced out parts over the particle's subspace `O(N^2)`,
 and solving to get the maximal Eigen-value `O(N^3)`.
 After the new pure-state is built we mix it in to our approximation and solve another 
@@ -253,7 +253,7 @@ done by [Oded Messer](https://github.com/omesser).
 We thank [Dr. Oded Kenneth](https://phys.technion.ac.il/en/people/person/295) for his wise mathematical 
 council in several critical stages of the project.
    
-## <a name="##appendix">Appendix: Matrix-element format
+## Appendix: Matrix-element format
             
 The matrix elements are expected in the following formats:
 		
