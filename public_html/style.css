@@ -1,0 +1,171 @@
+* {
+padding: 0 0 0 0;
+margin: 0 0 0 0;
+}
+
+body {
+background: #6699CC;
+color: #000000;
+font-family: arial, tahoma, verdana, serif;
+font-style: normal;
+font-weight: normal;
+padding: 0 5% 0 5%;
+}
+#header {
+width: 100%;
+background: #336699;
+float: left;
+}
+#header h1 {
+font-size: 18px;
+color: #f6f6f6;
+background:transparent;
+text-align: left;
+padding: 2% 0% 2% 4%;
+}
+#navigation {
+width:100%;
+float: left;
+background: #a9a9a9;
+padding: .2% 0 .2% 0
+}
+#navbar {
+width: 92%;
+background: transparent;
+list-style: none;
+font-size: 12px;
+font-weight: bold;
+float: left;
+position: relative;
+padding: 0 1% 0 1%;
+}
+#navbar li {
+float: left;
+position: relative;
+margin-right:10px;
+}
+#navbar a {
+display: block;
+text-decoration: none;
+color: #2244ee;
+padding: 2% 5px 2% 5px;
+}
+#navbar a:hover {
+color: #dddddd;
+}
+#navbar ul {
+background: transparent; 
+list-style: none;
+position: absolute;
+left: -9999px;
+}
+#navbar ul li {
+float: none;
+}
+#navbar ul a {
+white-space: nowrap; 
+}
+#navbar li:hover ul {
+left: 0; 
+}
+#navbar li:hover a { 
+background: #a9a9a9;
+text-decoration: none;
+}
+#navbar li:hover ul a { 
+text-decoration:none;
+}
+#navbar li:hover ul li a:hover { 
+background:#a9a9a9;
+}
+
+#main {
+width: 92%;
+background: #ffffff;
+float: left;
+padding: .5% 4% .2% 4%;
+}
+
+#main h1 {
+font-size: 16px;
+text-align: left;
+padding: 5px 0px 5px 0px;
+}
+
+#main p {
+font-size: 12px;
+text-align: left;
+padding: 1px 0px 1px 0px;
+}
+
+#documentation {
+width: 92%;
+background: #B0C4DE;
+float: left;
+padding: .5% 4% .2% 4%;
+}
+
+#documentation h1 {
+font-size: 16px;
+text-align: left;
+padding: 18px 0px 18px 0px;
+}
+
+#documentation h2 {
+font-size: 15px;
+text-align: left;
+padding: 12px 0px 12px 10px;
+}
+
+#documentation p {
+font-size: 14px;
+text-align: left;
+padding: 1px 0px 1px 0px;
+}
+
+#data {
+width: 76%;
+margin: 0% 3% 0% 0%;
+float: left;
+font-size: 12px;
+}
+
+#data textarea {
+font-size: 13px;
+text-align: left;
+width: 100%;
+overflow: scroll;
+}
+#data input {
+font-size: 13px;
+text-align: left;
+
+}
+
+#options {
+width: 20%;
+margin: 0% 0% 0% 1%;
+float: left;
+font-size: 12px;
+}
+
+#options input {
+font-size: 13px;
+line-height: 18px;
+width:75%;
+text-align: left;
+vertical-align:top;
+}
+
+#footer {
+width: 100%;
+background: #336799;
+float: left
+}
+address {
+color: #efefef;
+background: transparent;
+font-size: 10px;
+text-align: center;
+padding: .5% 0% .5% 0%
+}
