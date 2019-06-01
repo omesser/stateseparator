@@ -1,0 +1,9 @@
+*~
+.idea/
+build/
+backup/
+*cmake-build-debug/
+
+# we dump executables to the server-ready /public_html dir - don't SCM those of course
+/public_html/NRandomizer
+/public_html/NSeparator
