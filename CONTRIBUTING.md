@@ -1,5 +1,45 @@
 # Contributing to State Separator
 
+## Table of Contents
+
+- [Contributing to State Separator](#contributing-to-state-separator)
+  - [Table of Contents](#table-of-contents)
+  - [Project Overview](#project-overview)
+  - [Project Structure](#project-structure)
+  - [Architecture](#architecture)
+    - [Data Flow](#data-flow)
+    - [Build Modes](#build-modes)
+    - [Executables](#executables)
+  - [Prerequisites](#prerequisites)
+    - [For Native Build](#for-native-build)
+    - [For Running the Web Interface](#for-running-the-web-interface)
+  - [Building](#building)
+    - [Compile the C++ Backend](#compile-the-c-backend)
+    - [Install to Web Directory](#install-to-web-directory)
+    - [Development Build](#development-build)
+  - [Running](#running)
+    - [Option 1: Using Docker (Recommended)](#option-1-using-docker-recommended)
+      - [Local Build (current architecture only)](#local-build-current-architecture-only)
+      - [Multi-Architecture Build (for deployment)](#multi-architecture-build-for-deployment)
+    - [Option 2: Local PHP Development Server](#option-2-local-php-development-server)
+    - [Option 3: Apache/Nginx](#option-3-apachenginx)
+  - [Key Components Explained](#key-components-explained)
+    - [NSeparator (Main Algorithm)](#nseparator-main-algorithm)
+    - [NPeresTester](#nperestester)
+    - [NMixedState / NPureState](#nmixedstate--npurestate)
+  - [Testing](#testing)
+    - [Docker Integration Tests (Recommended)](#docker-integration-tests-recommended)
+    - [Binary Unit Tests](#binary-unit-tests)
+  - [Troubleshooting](#troubleshooting)
+    - [Build Errors](#build-errors)
+    - [Runtime Errors](#runtime-errors)
+  - [Contributing](#contributing)
+    - [Setup Pre-commit Hooks](#setup-pre-commit-hooks)
+    - [Contribution Workflow](#contribution-workflow)
+  - [License](#license)
+
+---
+
 ## Project Overview
 
 The application consists of:
@@ -235,27 +275,6 @@ php -S localhost:8080
 2. Configure your web server to serve `public_html/`
 3. Ensure PHP has permission to execute the binaries
 4. Access via your configured URL
-
----
-
-## Testing
-
-### Command Line Test
-
-After building with `SERVER=0`:
-
-```bash
-cd build/bin
-./NSeparator
-# Select a test scenario from the menu
-```
-
-### Manual Binary Test
-
-```bash
-cd public_html
-./NSeparator "2 2" "0.25 0 0 0 0 0.25 0 0 0 0 0.25 0 0 0 0 0.25" "" "" "" "3" "0"
-```
 
 ---
 
