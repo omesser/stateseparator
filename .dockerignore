@@ -1,0 +1,25 @@
+# Build artifacts
+build/
+*.o
+*.so
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Backup files
+backup/
+*.tar.gz
+
+# Documentation (not needed for runtime)
+*.md
+!README.md
+
+# License (included in image via COPY, but not needed separately)
+LICENSE
