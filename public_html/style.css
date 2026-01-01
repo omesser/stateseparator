@@ -1,171 +1,170 @@
 * {
-padding: 0 0 0 0;
-margin: 0 0 0 0;
+  padding: 0 0 0 0;
+  margin: 0 0 0 0;
 }
 
 body {
-background: #6699CC;
-color: #000000;
-font-family: arial, tahoma, verdana, serif;
-font-style: normal;
-font-weight: normal;
-padding: 0 5% 0 5%;
+  background: #6699cc;
+  color: #000000;
+  font-family: arial, tahoma, verdana, serif;
+  font-style: normal;
+  font-weight: normal;
+  padding: 0 5% 0 5%;
 }
 #header {
-width: 100%;
-background: #336699;
-float: left;
+  width: 100%;
+  background: #336699;
+  float: left;
 }
 #header h1 {
-font-size: 18px;
-color: #f6f6f6;
-background:transparent;
-text-align: left;
-padding: 2% 0% 2% 4%;
+  font-size: 18px;
+  color: #f6f6f6;
+  background: transparent;
+  text-align: left;
+  padding: 2% 0% 2% 4%;
 }
 #navigation {
-width:100%;
-float: left;
-background: #a9a9a9;
-padding: .2% 0 .2% 0
+  width: 100%;
+  float: left;
+  background: #a9a9a9;
+  padding: 0.2% 0 0.2% 0;
 }
 #navbar {
-width: 92%;
-background: transparent;
-list-style: none;
-font-size: 12px;
-font-weight: bold;
-float: left;
-position: relative;
-padding: 0 1% 0 1%;
+  width: 92%;
+  background: transparent;
+  list-style: none;
+  font-size: 12px;
+  font-weight: bold;
+  float: left;
+  position: relative;
+  padding: 0 1% 0 1%;
 }
 #navbar li {
-float: left;
-position: relative;
-margin-right:10px;
+  float: left;
+  position: relative;
+  margin-right: 10px;
 }
 #navbar a {
-display: block;
-text-decoration: none;
-color: #2244ee;
-padding: 2% 5px 2% 5px;
+  display: block;
+  text-decoration: none;
+  color: #2244ee;
+  padding: 2% 5px 2% 5px;
 }
 #navbar a:hover {
-color: #dddddd;
+  color: #dddddd;
 }
 #navbar ul {
-background: transparent; 
-list-style: none;
-position: absolute;
-left: -9999px;
+  background: transparent;
+  list-style: none;
+  position: absolute;
+  left: -9999px;
 }
 #navbar ul li {
-float: none;
+  float: none;
 }
 #navbar ul a {
-white-space: nowrap; 
+  white-space: nowrap;
 }
 #navbar li:hover ul {
-left: 0; 
+  left: 0;
 }
-#navbar li:hover a { 
-background: #a9a9a9;
-text-decoration: none;
+#navbar li:hover a {
+  background: #a9a9a9;
+  text-decoration: none;
 }
-#navbar li:hover ul a { 
-text-decoration:none;
+#navbar li:hover ul a {
+  text-decoration: none;
 }
-#navbar li:hover ul li a:hover { 
-background:#a9a9a9;
+#navbar li:hover ul li a:hover {
+  background: #a9a9a9;
 }
 
 #main {
-width: 92%;
-background: #ffffff;
-float: left;
-padding: .5% 4% .2% 4%;
+  width: 92%;
+  background: #ffffff;
+  float: left;
+  padding: 0.5% 4% 0.2% 4%;
 }
 
 #main h1 {
-font-size: 16px;
-text-align: left;
-padding: 5px 0px 5px 0px;
+  font-size: 16px;
+  text-align: left;
+  padding: 5px 0px 5px 0px;
 }
 
 #main p {
-font-size: 12px;
-text-align: left;
-padding: 1px 0px 1px 0px;
+  font-size: 12px;
+  text-align: left;
+  padding: 1px 0px 1px 0px;
 }
 
 #documentation {
-width: 92%;
-background: #B0C4DE;
-float: left;
-padding: .5% 4% .2% 4%;
+  width: 92%;
+  background: #b0c4de;
+  float: left;
+  padding: 0.5% 4% 0.2% 4%;
 }
 
 #documentation h1 {
-font-size: 16px;
-text-align: left;
-padding: 18px 0px 18px 0px;
+  font-size: 16px;
+  text-align: left;
+  padding: 18px 0px 18px 0px;
 }
 
 #documentation h2 {
-font-size: 15px;
-text-align: left;
-padding: 12px 0px 12px 10px;
+  font-size: 15px;
+  text-align: left;
+  padding: 12px 0px 12px 10px;
 }
 
 #documentation p {
-font-size: 14px;
-text-align: left;
-padding: 1px 0px 1px 0px;
+  font-size: 14px;
+  text-align: left;
+  padding: 1px 0px 1px 0px;
 }
 
 #data {
-width: 76%;
-margin: 0% 3% 0% 0%;
-float: left;
-font-size: 12px;
+  width: 76%;
+  margin: 0% 3% 0% 0%;
+  float: left;
+  font-size: 12px;
 }
 
 #data textarea {
-font-size: 13px;
-text-align: left;
-width: 100%;
-overflow: scroll;
+  font-size: 13px;
+  text-align: left;
+  width: 100%;
+  overflow: scroll;
 }
 #data input {
-font-size: 13px;
-text-align: left;
-
+  font-size: 13px;
+  text-align: left;
 }
 
 #options {
-width: 20%;
-margin: 0% 0% 0% 1%;
-float: left;
-font-size: 12px;
+  width: 20%;
+  margin: 0% 0% 0% 1%;
+  float: left;
+  font-size: 12px;
 }
 
 #options input {
-font-size: 13px;
-line-height: 18px;
-width:75%;
-text-align: left;
-vertical-align:top;
+  font-size: 13px;
+  line-height: 18px;
+  width: 75%;
+  text-align: left;
+  vertical-align: top;
 }
 
 #footer {
-width: 100%;
-background: #336799;
-float: left
+  width: 100%;
+  background: #336799;
+  float: left;
 }
 address {
-color: #efefef;
-background: transparent;
-font-size: 10px;
-text-align: center;
-padding: .5% 0% .5% 0%
+  color: #efefef;
+  background: transparent;
+  font-size: 10px;
+  text-align: center;
+  padding: 0.5% 0% 0.5% 0%;
 }

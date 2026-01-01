@@ -3,15 +3,14 @@
 #include "NSeparator.h"
 #include "NCollector.h"
 
-using std::map;
-using std::sort;
-using std::reverse;
 using std::log;
+using std::map;
+using std::reverse;
+using std::sort;
 
 NSeparator* NSeparator::_theInstance = NULL;
-const uint FNPSITERNUM_LOW  = 100; 
+const uint FNPSITERNUM_LOW = 100;
 const uint FNPSITERNUM_HIGH = 1000;
-
 
 
 /*****************************************************************************
@@ -26,7 +25,7 @@ const uint FNPSITERNUM_HIGH = 1000;
  * the "nearest" separable state if it is entangled, or the decomposition to pure states if it
  * is separable. Both of the above are approximations which could change due to the algorithm's
  * reliance on randomization.
- * 
+ *
  * Notations:
  *   "rho"		- The test state (the given density matrix).
  *   "rho_s"	- The approximated state (the iterative built state). Stands for "rho separable".
@@ -48,7 +47,7 @@ const uint FNPSITERNUM_HIGH = 1000;
  *   targetDistance			- End the algorithm when the calculated distance is lower than this.
  *   minProbForState		- Disacrd states with respective probabilites below this.
  *   targetNumberOfStates	- Confine the solution to contain at most this many states.
- *   boostAccuracy			- boosting accuracy by uping the iteration ceiling and inner fnpsIterationNum 
+ *   boostAccuracy			- boosting accuracy by uping the iteration ceiling and inner fnpsIterationNum
  *							 (number of trace outs steps). Defaults to false
  *
  * Return value:
@@ -56,9 +55,8 @@ const uint FNPSITERNUM_HIGH = 1000;
  *   the approximated separable mixed state and the distance to the given state.
  *
  */
-NResult NSeparator::separate(const MatrixXcd& src, const vector<uint>& particleSizes,
-							 double targetDistance, double minProbForState, uint targetNumberOfStates, bool boostAccuracy)
-{
+NResult NSeparator::separate(const MatrixXcd& src, const vector<uint>& particleSizes, double targetDistance,
+                             double minProbForState, uint targetNumberOfStates, bool boostAccuracy) {
 	// For debug printing, when wanting to print more than string+int
 	std::ostringstream debugstrm;
 	// Trace out iteration number
@@ -67,16 +65,16 @@ NResult NSeparator::separate(const MatrixXcd& src, const vector<uint>& particleS
 	// TIMEOUT - outermost iteration ceiling
 	int OuterIterationCounter = 0;
 
-	// 2 modes of rigorousness: 
-	if (boostAccuracy){
+	// 2 modes of rigorousness:
+	if (boostAccuracy) {
 		NLOG("NSeparator: Accuracy boost - rigorous computation mode");
 		fnpsIterationNum = FNPSITERNUM_HIGH;
-		OuterIterationCounter = N*N*N;
+		OuterIterationCounter = N * N * N;
 	} else {
 		NLOG("NSeparator: No accuracy boost - fast mode");
 		fnpsIterationNum = FNPSITERNUM_LOW;
-		OuterIterationCounter = N*N + N;
-		//OuterIterationCounter = targetNumberOfStates + (int)log((double)targetNumberOfStates); // original TIMEOUT
+		OuterIterationCounter = N * N + N;
+		// OuterIterationCounter = targetNumberOfStates + (int)log((double)targetNumberOfStates); // original TIMEOUT
 	}
 
 	// Initialization
@@ -84,7 +82,7 @@ NResult NSeparator::separate(const MatrixXcd& src, const vector<uint>& particleS
 	if (isZero(targetDistance)) {
 		targetDistance = targetDistanceDefault;
 	}
-	NMixedState rho_s(rho_p, minProbForState, targetNumberOfStates, rho); // rho_p is finalized in reset()
+	NMixedState rho_s(rho_p, minProbForState, targetNumberOfStates, rho);  // rho_p is finalized in reset()
 	NResult result(rho_s, rho_s.distance());
 
 	// Stage I - Peres test:
@@ -104,12 +102,11 @@ NResult NSeparator::separate(const MatrixXcd& src, const vector<uint>& particleS
 	NENDCOLLECTION(NCT_MAIN_ITERATION);
 
 
-	
 	// If the first iteration produced S < epsilon - we expect the default reason to be this:
 	if (S <= epsilon) {
 		result._reason = NREASON_DISTANCE;
 	}
-	
+
 	// The main loop:
 	double minDist = result._distance;
 	try {
@@ -120,25 +117,25 @@ NResult NSeparator::separate(const MatrixXcd& src, const vector<uint>& particleS
 			if (distance > minDist) {
 				// TODO: this exception should be thrown after the numerical bugs are fixed.
 				// throw NError("NSeparator: Calculated larger distance than the previous iteration.");
-				//NLOGNUM("NSeparator: Calculated larger distance than the previous minimum", distance);
-				debugstrm << "NSeparator: Calculated larger distance: " << distance << " than the previous minimum: " << minDist;
+				// NLOGNUM("NSeparator: Calculated larger distance than the previous minimum", distance);
+				debugstrm << "NSeparator: Calculated larger distance: " << distance
+				          << " than the previous minimum: " << minDist;
 				NLOG(debugstrm.str());
-				debugstrm.str(std::string()); // efficiently cleaning the debugstrm
-				// TODO: find a way to revert this result
-			}
-			else {
+				debugstrm.str(std::string());  // efficiently cleaning the debugstrm
+				                               // TODO: find a way to revert this result
+			} else {
 				minDist = distance;
 			}
-			if (distance < targetDistance) { // target distance reached
+			if (distance < targetDistance) {  // target distance reached
 				result._reason = NREASON_DISTANCE;
 				break;
 			}
-			if (--OuterIterationCounter < 0) { // timeout reached - return the last best mixed state
+			if (--OuterIterationCounter < 0) {  // timeout reached - return the last best mixed state
 				result._reason = NREASON_TIMEOUT;
 				break;
 			}
 			NSTARTCOLLECTION(NCT_MAIN_ITERATION);
-			S = mainIterationStep(rho_s, fnpsIterationNum);   // rho_p is calculated here
+			S = mainIterationStep(rho_s, fnpsIterationNum);  // rho_p is calculated here
 			NENDCOLLECTION(NCT_MAIN_ITERATION);
 		}
 		if (result._reason == NREASON_NONE) {
@@ -147,15 +144,16 @@ NResult NSeparator::separate(const MatrixXcd& src, const vector<uint>& particleS
 	} catch (NError err) {
 		// If the failure is critical (e.g. memory allocation failure) we should escalate the error.
 		// Otherwise, just set the termination reason to fail which means numerical error.
-		if (err.criticalFailure()) throw;
+		if (err.criticalFailure())
+			throw;
 		result._reason = NREASON_FAIL;
 		result._distance = rho_s.distance();
 		result._state = rho_s;
 #ifdef __NDEBUG__
 		err.print();
-#endif // __NDEBUG__
+#endif  // __NDEBUG__
 	}
-	
+
 	result._distance = rho_s.distance();
 	rho_s.sortStates();
 	result._state = rho_s;
@@ -170,7 +168,7 @@ uint NSeparator::ParticleRecord::completeRecord(uint jumpFactor, uint systemSize
 	_jumpFactor = jumpFactor;
 	uint reducedSize = systemSize / _size;
 	_indices.resize(reducedSize);
-	_subMatrix.resize(reducedSize,reducedSize);
+	_subMatrix.resize(reducedSize, reducedSize);
 	buildIndices(systemSize);
 	return reducedSize;
 }
@@ -183,7 +181,7 @@ void NSeparator::ParticleRecord::buildIndices(uint systemSize) {
 	uint runningIndex = 0;
 	uint jumpingIndex = 0;
 	for (uint b = 0; b < numOfBlocks; ++b) {
-		jumpingIndex = b*blockSize;
+		jumpingIndex = b * blockSize;
 		for (uint j = 0; j < _jumpFactor; ++j) {
 			_indices[runningIndex] = jumpingIndex;
 			++jumpingIndex;
@@ -200,40 +198,33 @@ void NSeparator::ParticleRecord::partialTraceout(const MatrixXcd& matrix, const 
 		uint iStart = _indices[i];
 		for (uint k = 0; k < i; ++k) {
 			uint kStart = _indices[k];
-			_subMatrix(i,k) = 0;
+			_subMatrix(i, k) = 0;
 			for (uint r = 0; r < _size; ++r) {
-				uint rActual = r*_jumpFactor;
+				uint rActual = r * _jumpFactor;
 				for (uint s = 0; s < _size; ++s) {
-					uint sActual = s*_jumpFactor;
-					_subMatrix(i,k) += conj(vec[r])
-									* matrix(iStart + rActual , kStart + sActual)
-									* vec[s];
+					uint sActual = s * _jumpFactor;
+					_subMatrix(i, k) += conj(vec[r]) * matrix(iStart + rActual, kStart + sActual) * vec[s];
 				}
 			}
-			_subMatrix(k,i) = conj(_subMatrix(i,k));
+			_subMatrix(k, i) = conj(_subMatrix(i, k));
 		}
-		_subMatrix(i,i) = 0;
+		_subMatrix(i, i) = 0;
 		// The diagonal calculation is optimized here. We can do this because the block for calculating the diagonal
 		// values is self-adjoint. This means that we can consider only the lower triangular part of the block.
 		for (uint r = 0; r < _size; ++r) {
-			uint rActual = r*_jumpFactor;
+			uint rActual = r * _jumpFactor;
 			for (uint s = 0; s < r; ++s) {
-				uint sActual = s*_jumpFactor;
-				ValType val = conj(vec[r])
-							* matrix(iStart + rActual , iStart + sActual)
-							* vec[s];
-				_subMatrix(i,i) += 2 * val.real();
+				uint sActual = s * _jumpFactor;
+				ValType val = conj(vec[r]) * matrix(iStart + rActual, iStart + sActual) * vec[s];
+				_subMatrix(i, i) += 2 * val.real();
 			}
-			_subMatrix(i,i) += conj(vec[r])
-							* matrix(iStart + rActual , iStart + rActual)
-							* vec[r];
+			_subMatrix(i, i) += conj(vec[r]) * matrix(iStart + rActual, iStart + rActual) * vec[r];
 		}
 	}
 }
 
 void NSeparator::reset(const MatrixXcd& src, const vector<uint>& particleSizes, double& minProbForState,
-					   uint& targetNumberOfStates, uint fnpsIterationNum)
-{
+                       uint& targetNumberOfStates, uint fnpsIterationNum) {
 	// Initialize all the member data fields.
 	_systemSize = (uint)src.rows();
 	rho = src;
@@ -250,7 +241,7 @@ void NSeparator::reset(const MatrixXcd& src, const vector<uint>& particleSizes, 
 	// Set the target number of states if not supplied by the user. We don't need more than N^2.
 	if (targetNumberOfStates == 0) {
 		int N = (int)rho.rows();
-		targetNumberOfStates = N*N;
+		targetNumberOfStates = N * N;
 	}
 
 	// Set the minimum probability threshold for keeping a pure state if not supplied by the user.
@@ -259,7 +250,7 @@ void NSeparator::reset(const MatrixXcd& src, const vector<uint>& particleSizes, 
 	}
 
 	// Start with the completely mixed state.
-	MatrixXcd begin(VectorXcd::Constant(rho.rows(),1./rho.rows()).asDiagonal());
+	MatrixXcd begin(VectorXcd::Constant(rho.rows(), 1. / rho.rows()).asDiagonal());
 
 	// Now find the nearest pure state.
 	findNearestPureState(rho - begin, fnpsIterationNum);
@@ -268,7 +259,7 @@ void NSeparator::reset(const MatrixXcd& src, const vector<uint>& particleSizes, 
 double NSeparator::mainIterationStep(const NMixedState& rho_s, uint fnpsIterationNum) {
 	MatrixXcd sigma = rho - rho_s;
 	NSTARTCOLLECTION(NCT_FNPS);
-	findNearestPureState(sigma, fnpsIterationNum); //rho_p is calculated here
+	findNearestPureState(sigma, fnpsIterationNum);  // rho_p is calculated here
 	NENDCOLLECTION(NCT_FNPS);
 	return trace((rho_p - rho_s), sigma).real();
 }
@@ -280,14 +271,15 @@ void NSeparator::findNearestPureState(const MatrixXcd& sigma, uint maxIterationN
 	}
 	uint count = 0;
 	while (!calcFNPSIteration(sigma)) {
-		if (++count >= maxIterationNumber) break; // This heuristic can be changed. Originally 100
+		if (++count >= maxIterationNumber)
+			break;  // This heuristic can be changed. Originally 100
 	}
-	rho_p.finalize(); // This builds the state's matrix form
+	rho_p.finalize();  // This builds the state's matrix form
 }
 
 bool NSeparator::calcFNPSIteration(const MatrixXcd& sigma) {
 	vector<double> eigenValues(_numOfParticles);
-	bool done = true; // true if the max eigenvalue of all submatrices is the same
+	bool done = true;  // true if the max eigenvalue of all submatrices is the same
 	for (uint i = 0; i < _numOfParticles; ++i) {
 		// Perform the traceout
 		NSTARTCOLLECTION(NCT_PTO);
@@ -296,7 +288,7 @@ bool NSeparator::calcFNPSIteration(const MatrixXcd& sigma) {
 
 		// Find the maximal eigenvalue
 		NSTARTCOLLECTION(NCT_CALC_EV);
-		eigenValues[i] = maxEigenVector(_solvers[i], _traceoutData[i][_numOfParticles-2]._subMatrix, rho_p[i]);
+		eigenValues[i] = maxEigenVector(_solvers[i], _traceoutData[i][_numOfParticles - 2]._subMatrix, rho_p[i]);
 		NENDCOLLECTION(NCT_CALC_EV);
 
 		if (!isEqual(eigenValues[i], eigenValues[0])) {
@@ -311,7 +303,7 @@ void NSeparator::traceOut(const MatrixXcd& sigma, uint particleNum) {
 	uint numOfTraceouts = _numOfParticles - 1;
 	theSystem[0].partialTraceout(sigma, rho_p[theSystem[0]._index]);
 	for (uint i = 1; i < numOfTraceouts; ++i) {
-		theSystem[i].partialTraceout(theSystem[i-1]._subMatrix, rho_p[theSystem[i]._index]);
+		theSystem[i].partialTraceout(theSystem[i - 1]._subMatrix, rho_p[theSystem[i]._index]);
 	}
 }
 
@@ -342,7 +334,7 @@ void NSeparator::buildSystemData(const vector<uint>& particleSizes) {
 		uint index = sortedSystem[p]._index;
 		uint jumpFactor = 1;
 		rawSystem[index] = 1;
-		for (uint i = index+1; i < _numOfParticles; ++i) {
+		for (uint i = index + 1; i < _numOfParticles; ++i) {
 			jumpFactor *= rawSystem[i];
 		}
 		sortedSystem[p]._jumpFactor = jumpFactor;
@@ -357,7 +349,8 @@ void NSeparator::buildSystemData(const vector<uint>& particleSizes) {
 		SystemStructure& particleData = _traceoutData[p];
 		particleData.resize(numOfTraceouts);
 		for (uint i = 0, d = 0; i < _numOfParticles; ++i) {
-			if (sortedSystem[i]._index == p) continue;
+			if (sortedSystem[i]._index == p)
+				continue;
 			particleData[d] = sortedSystem[i];
 			uint jumpFactor = sortedSystem[i]._jumpFactor;
 			if (sortedSystem[i]._size <= currentSize && sortedSystem[i]._index < p) {

@@ -17,8 +17,10 @@
  *****************************************************************************/
 static void runOnce(const MatrixXcd& matrix, const vector<uint>& particleSizes);
 static NRandomGenerator* initialize();
-MatrixXcd buildMatrix(NRandomGenerator* gen, const char* particleSizesStr, vector<uint>& particleSizes, ExampleMatrices example);
-static MatrixXcd randomizeMatrix(NRandomGenerator* gen, const vector<uint>& particleSizes, uint stateSize, uint numOfStates = 0);
+MatrixXcd buildMatrix(NRandomGenerator* gen, const char* particleSizesStr, vector<uint>& particleSizes,
+                      ExampleMatrices example);
+static MatrixXcd randomizeMatrix(NRandomGenerator* gen, const vector<uint>& particleSizes, uint stateSize,
+                                 uint numOfStates = 0);
 static MatrixXcd buildExample(ExampleMatrices example);
 static void printResults(const MatrixXcd& mat, const NResult& res);
 
@@ -50,10 +52,10 @@ void testRandom(const char* particleSizesStr /*= "2 2"*/) {
 // runOnce - apply the separator to the given system and collect statistics
 void runOnce(const MatrixXcd& matrix, const vector<uint>& particleSizes) {
 	// Optional parameters
-	double targetDistance = 0;		// use default
-	double minProbForState = 0;		// use default
-	uint targetNumberOfStates = 0;	// use default
-	
+	double targetDistance = 0;      // use default
+	double minProbForState = 0;     // use default
+	uint targetNumberOfStates = 0;  // use default
+
 	// Get the separator
 	NSeparator* sep = NSeparator::getInstance();
 
@@ -74,13 +76,14 @@ NRandomGenerator* initialize() {
 
 	// Start the pseudo random number generator
 #ifdef __NNORANDOM__
-	NRandomGenerator::create(1329498937); // use a constant seed - makes it easier to debug
-#endif // __NNORANDOM__
+	NRandomGenerator::create(1329498937);  // use a constant seed - makes it easier to debug
+#endif                                     // __NNORANDOM__
 	return NRandomGenerator::getInstance();
 }
 
 // buildMatrix - return the requested matrix according to the given particleSizesStr and example if applicable
-MatrixXcd buildMatrix(NRandomGenerator* gen, const char* particleSizesStr, vector<uint>& particleSizes, ExampleMatrices example) {
+MatrixXcd buildMatrix(NRandomGenerator* gen, const char* particleSizesStr, vector<uint>& particleSizes,
+                      ExampleMatrices example) {
 	// Get the particle sizes
 	uint stateSize = 0;
 	stateSize = NInputHandler::getParticleSizes(particleSizesStr, particleSizes);
@@ -88,18 +91,17 @@ MatrixXcd buildMatrix(NRandomGenerator* gen, const char* particleSizesStr, vecto
 	// Build the matrix
 	if (example == NEM_END) {
 		return randomizeMatrix(gen, particleSizes, stateSize);
-	}
-	else {
+	} else {
 		return buildExample(example);
 	}
 }
 
 // randomizeMatrix - randomizes a new matrix
-static MatrixXcd randomizeMatrix(NRandomGenerator* gen, const vector<uint>& particleSizes, uint stateSize, uint numOfStates /*= 0*/)
-{
+static MatrixXcd randomizeMatrix(NRandomGenerator* gen, const vector<uint>& particleSizes, uint stateSize,
+                                 uint numOfStates /*= 0*/) {
 	uint numOfParticles = (uint)particleSizes.size();
 	if (numOfStates == 0) {
-		numOfStates = gen->getUint(stateSize*stateSize - 1);
+		numOfStates = gen->getUint(stateSize * stateSize - 1);
 	}
 	MatrixXcd mat(stateSize, stateSize);
 	mat.setZero();
@@ -113,8 +115,8 @@ static MatrixXcd randomizeMatrix(NRandomGenerator* gen, const vector<uint>& part
 		}
 		pureState.finalize();
 #ifdef __NDEBUG__
-		pureState.print(probs[s],s);
-#endif // __NDEBUG__
+		pureState.print(probs[s], s);
+#endif  // __NDEBUG__
 		mat += (pureState * probs[s]);
 	}
 	return mat;
@@ -122,42 +124,22 @@ static MatrixXcd randomizeMatrix(NRandomGenerator* gen, const vector<uint>& part
 
 // buildExample - returns one of the example matrices
 static MatrixXcd buildExample(ExampleMatrices example) {
-	MatrixXcd matrix(4,4);
+	MatrixXcd matrix(4, 4);
 	switch (example) {
 	case NEM_BARELY_SEPARABLE:
-		matrix <<
-		0.33, 0,    0,    0.16,
-		0,    0.17, 0,    0,
-		0,    0,    0.17, 0,
-		0.16, 0,    0,    0.33;
+		matrix << 0.33, 0, 0, 0.16, 0, 0.17, 0, 0, 0, 0, 0.17, 0, 0.16, 0, 0, 0.33;
 		break;
 	case NEM_SLIGHTLY_ENTANGLED:
-		matrix <<
-		0.335, 0,     0,     0.17,
-		0,     0.165, 0,     0,
-		0,     0,     0.165, 0,
-		0.17,  0,     0,     0.335;
+		matrix << 0.335, 0, 0, 0.17, 0, 0.165, 0, 0, 0, 0, 0.165, 0, 0.17, 0, 0, 0.335;
 		break;
 	case NEM_BELL_1:
-		matrix <<
-		0.50,  0,     0,     0.50,
-		0,     0,     0,     0,
-		0,     0,     0,     0,
-		0.50,  0,     0,     0.50;
+		matrix << 0.50, 0, 0, 0.50, 0, 0, 0, 0, 0, 0, 0, 0, 0.50, 0, 0, 0.50;
 		break;
 	case NEM_BELL_2:
-		matrix <<
-		0,     0,     0,     0,
-		0,     0.50,  -0.50, 0,
-		0,     -0.50, 0.50,  0,
-		0,     0,     0,     0;
+		matrix << 0, 0, 0, 0, 0, 0.50, -0.50, 0, 0, -0.50, 0.50, 0, 0, 0, 0, 0;
 		break;
 	case NEM_SIMPLE_SEP:
-		matrix <<
-		0.3,   0,     0,     0,
-		0,     0,     0,     0,
-		0,     0,     0,     0,
-		0,     0,     0,     0.7;
+		matrix << 0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7;
 		break;
 	default:
 		throw NError("Bad example requested from tester.");
@@ -174,19 +156,19 @@ void printResults(const MatrixXcd& matrix, const NResult& res) {
 
 #ifdef __NCOLLECTSTATS__
 	reasonstrm << "Total runtime: " << collectedTime(NCT_TOTAL_TIME) << "." << endl
-			   << "Total time spent in the main iteration: " << collectedTime(NCT_MAIN_ITERATION) << "." << endl
-			   << "    the FNPS algorithm took: " << collectedTime(NCT_FNPS) << "." << endl
-			   << "        eigenvalue calculation took: " << collectedTime(NCT_CALC_EV) << "." << endl
-			   << "        partial traceouts took: " << collectedTime(NCT_PTO) << "." << endl
-			   << "Total time for mixing states: " << collectedTime(NCT_MIXIN) << "." << endl
-			   << "    adding states took: " << collectedTime(NCT_ADD_STATE) << "." << endl
-			   << "    minimization took: " << collectedTime(NCT_MINIMIZATION) << "." << endl
-			   << "        block allocation took: " << collectedTime(NCT_BLOCK_ALLOCATION) << "." << endl
-			   << "        linear solving took: " << collectedTime(NCT_LINEAR_SOLVE) << "." << endl
-			   << "        QP shifting took: " << collectedTime(NCT_SHIFT) << "." << endl
-			   << "    probability updates took: " << collectedTime(NCT_UPDATE_PROBS) << "." << endl
-			   << "    matrix rebuilding took: " << collectedTime(NCT_BUILD_MATRIX) << "." << endl;
-#endif // __NCOLLECTSTATS__
+	           << "Total time spent in the main iteration: " << collectedTime(NCT_MAIN_ITERATION) << "." << endl
+	           << "    the FNPS algorithm took: " << collectedTime(NCT_FNPS) << "." << endl
+	           << "        eigenvalue calculation took: " << collectedTime(NCT_CALC_EV) << "." << endl
+	           << "        partial traceouts took: " << collectedTime(NCT_PTO) << "." << endl
+	           << "Total time for mixing states: " << collectedTime(NCT_MIXIN) << "." << endl
+	           << "    adding states took: " << collectedTime(NCT_ADD_STATE) << "." << endl
+	           << "    minimization took: " << collectedTime(NCT_MINIMIZATION) << "." << endl
+	           << "        block allocation took: " << collectedTime(NCT_BLOCK_ALLOCATION) << "." << endl
+	           << "        linear solving took: " << collectedTime(NCT_LINEAR_SOLVE) << "." << endl
+	           << "        QP shifting took: " << collectedTime(NCT_SHIFT) << "." << endl
+	           << "    probability updates took: " << collectedTime(NCT_UPDATE_PROBS) << "." << endl
+	           << "    matrix rebuilding took: " << collectedTime(NCT_BUILD_MATRIX) << "." << endl;
+#endif  // __NCOLLECTSTATS__
 
 	reasonstrm << endl << "The approximated matrix is at distance ";
 	NOutputHandler::printStrm(reasonstrm, res._distance);
@@ -195,4 +177,4 @@ void printResults(const MatrixXcd& matrix, const NResult& res) {
 	res._state.print();
 }
 
-#endif // __NRUNONSERVER__
+#endif  // __NRUNONSERVER__

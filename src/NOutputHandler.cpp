@@ -2,22 +2,22 @@
 #include <ios>
 #include "NOutputHandler.h"
 
+using std::fixed;
 using std::left;
 using std::right;
-using std::fixed;
-using std::setw;
-using std::setprecision;
 using std::setiosflags;
+using std::setprecision;
+using std::setw;
 
 #if defined(linux)
 typedef std::_Ios_Fmtflags flagsType;
-#else // not linux
+#else   // not linux
 typedef int flagsType;
-#endif // not linux
+#endif  // not linux
 
-uint NOutputHandler::_outputPrecision = 3;	// default value - this will be overriden by user input
-uint NOutputHandler::_componentWidth = 5;	// -0.RRR
-uint NOutputHandler::_outputWidth = 12;		// 0.RRR+i0.III  does not include the leading '-' of the real component
+uint NOutputHandler::_outputPrecision = 3;  // default value - this will be overriden by user input
+uint NOutputHandler::_componentWidth = 5;   // -0.RRR
+uint NOutputHandler::_outputWidth = 12;     // 0.RRR+i0.III  does not include the leading '-' of the real component
 uint NOutputHandler::_pureImaginary = 11;
 
 
@@ -31,13 +31,13 @@ void NOutputHandler::print(const ValType& num) {
 }
 
 void NOutputHandler::print(const MatrixXcd& matrix) {
-    stringstream strm;
+	stringstream strm;
 	uint size = (uint)matrix.rows();
 	for (uint i = 0; i < size; ++i) {
 		printStrm(strm, matrix.row(i), true);
 		strm << endl;
 	}
-    NDATA(strm);
+	NDATA(strm);
 }
 
 double NOutputHandler::truncate(double num, char* sign) {
@@ -56,21 +56,17 @@ void NOutputHandler::printStrm(stringstream& strm, const ValType& num) {
 	double realVal = truncate(num.real(), &realSign);
 	char imagSign = (realVal == 0) ? ' ' : '+';
 	double imagVal = truncate(num.imag(), &imagSign);
-	
+
 	if (realVal != 0) {
 		if (imagVal != 0) {
-			strm << realSign << setw(_componentWidth) << realVal
-				 << imagSign << "i" << setw(_componentWidth) << imagVal;
-		}
-		else {
+			strm << realSign << setw(_componentWidth) << realVal << imagSign << "i" << setw(_componentWidth) << imagVal;
+		} else {
 			strm << realSign << setw(_outputWidth) << realVal;
 		}
-	}
-	else {
+	} else {
 		if (imagVal != 0) {
 			strm << imagSign << "i" << setw(_pureImaginary) << imagVal;
-		}
-		else {
+		} else {
 			strm << ' ' << setw(_outputWidth) << 0;
 		}
 	}

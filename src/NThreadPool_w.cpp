@@ -33,20 +33,20 @@ int NThreadPool::numOfCPUs() const {
 }
 
 void NThreadPool::createThread(int* threadIndexPtr) {
-	HANDLE hthread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)startWindowsSecondaryThread, threadIndexPtr,
-								  0, NULL);
+	HANDLE hthread =
+	    CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)startWindowsSecondaryThread, threadIndexPtr, 0, NULL);
 }
 
 void NThreadPool::wakeupThreads() {
 	// Wait until all threads are ready for work.
-	WaitForMultipleObjects(_numOfSecondaryThreads, &_threadsReady[1], true, INFINITE);		
+	WaitForMultipleObjects(_numOfSecondaryThreads, &_threadsReady[1], true, INFINITE);
 
-	
+
 	// The secondary threads will wait on this event after they are done to allow the main thread
 	// to reset the _workAvailable event. Failing to do so may cause a secondary thread to begin
 	// working again on the same data.
 	ResetEvent(_threadsReady[0]);
-	
+
 	// Notify the other threads that work is available.
 	SetEvent(_workAvailable);
 }
@@ -99,6 +99,6 @@ void NThreadPool::notifyThreadCreated(int threadIndex) {
  *****************************************************************************/
 DWORD WINAPI startWindowsSecondaryThread(LPVOID threadIndexPtr) {
 	int threadIndex = *reinterpret_cast<int*>(threadIndexPtr);
-	startSecondaryThread(threadIndex); // never returns
+	startSecondaryThread(threadIndex);  // never returns
 	return 0;
 }

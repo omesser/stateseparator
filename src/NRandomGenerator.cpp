@@ -9,7 +9,8 @@ const long double pi = 3.1415926535897932384626433832795;
  *                          PUBLIC MEMBER FUNCTIONS                          *
  *****************************************************************************/
 void NRandomGenerator::randomizeVector(VectorXcd& vec, bool pureReal /*= false*/) const {
-	if (vec.size() == 0) return;
+	if (vec.size() == 0)
+		return;
 	vec[0] = 1;
 	for (int i = 1; i < vec.size(); ++i) {
 		double thetaHalf = (acos(val()) / 2);
@@ -19,13 +20,9 @@ void NRandomGenerator::randomizeVector(VectorXcd& vec, bool pureReal /*= false*/
 		vec[i] = sin(thetaHalf);
 		if (!pureReal) {
 			double phi = pi * val();
-#if defined(linux)
-			vec[i].imag() = (vec[i].real() * sin(phi));	// Linux
-			vec[i].real() = (vec[i].real() * cos(phi));	// Linux
-#else // not linux
-			vec[i].imag(vec[i].real() * sin(phi));		// Windows
-			vec[i].real(vec[i].real() * cos(phi));		// Windows
-#endif // not linux
+			double r = vec[i].real();
+			vec[i].imag(r * sin(phi));
+			vec[i].real(r * cos(phi));
 		}
 	}
 }

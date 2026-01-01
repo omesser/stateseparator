@@ -5,9 +5,9 @@
 #include "NRandomGenerator.h"
 #include "NPureState.h"
 
+using Eigen::SelfAdjointEigenSolver;
 using std::fixed;
 using std::setprecision;
-using Eigen::SelfAdjointEigenSolver;
 
 typedef SelfAdjointEigenSolver<MatrixXcd> EVSolver;
 
@@ -15,7 +15,7 @@ typedef SelfAdjointEigenSolver<MatrixXcd> EVSolver;
 static MatrixXcd randomizeMatrix(NRandomGenerator* gen, const vector<uint>& particleSizes, uint stateSize) {
 	uint numOfParticles = particleSizes.size();
 
-	uint numOfStates = gen->getUint(stateSize*stateSize - 1);
+	uint numOfStates = gen->getUint(stateSize * stateSize - 1);
 
 	MatrixXcd mat(stateSize, stateSize);
 	mat.setZero();
@@ -38,57 +38,41 @@ static void truncateMatrix(MatrixXcd& matrix, uint outputPrecision) {
 		for (uint j = 0; j < i; ++j) {
 			stringstream realValStrm;
 			stringstream imagValStrm;
-			realValStrm << fixed << setprecision(outputPrecision) << matrix(i,j).real();
-			imagValStrm << fixed << setprecision(outputPrecision) << matrix(i,j).imag();
+			realValStrm << fixed << setprecision(outputPrecision) << matrix(i, j).real();
+			imagValStrm << fixed << setprecision(outputPrecision) << matrix(i, j).imag();
 			double realVal;
 			double imagVal;
 			realValStrm >> realVal;
 			imagValStrm >> imagVal;
-#if defined(linux)
-			matrix(i,j).real() = realVal;	// Linux
-			matrix(i,j).imag() = imagVal;	// Linux
-			matrix(j,i).real() = realVal;	// Linux
-			matrix(j,i).imag() = -imagVal;	// Linux
-#else // not linux
-			matrix(i,j).real(realVal);	// Windows
-			matrix(i,j).imag(imagVal);	// Windows
-			matrix(j,i).real(realVal);	// Windows
-			matrix(j,i).imag(-imagVal);	// Windows
-#endif // not linux
+			matrix(i, j).real(realVal);
+			matrix(i, j).imag(imagVal);
+			matrix(j, i).real(realVal);
+			matrix(j, i).imag(-imagVal);
 		}
 		stringstream diagStrm;
 		double diagVal;
-		diagStrm << fixed << setprecision(outputPrecision) << matrix(i,i).real();
+		diagStrm << fixed << setprecision(outputPrecision) << matrix(i, i).real();
 		diagStrm >> diagVal;
-#if defined(linux)
-		matrix(i,i).real() = diagVal;	// Linux
-		matrix(i,i).imag() = 0;			// Linux
-#else // not linux
-		matrix(i,i).real(diagVal);	// Windows
-		matrix(i,i).imag(0);		// Windows
-#endif // not linux
+		matrix(i, i).real(diagVal);
+		matrix(i, i).imag(0);
 	}
 }
 
 static void correctTrace(MatrixXcd& matrix) {
 	double matTrace = trace(matrix).real();
 	if (!isEqual(matTrace, 1)) {
-		matTrace -= matrix(0,0).real();
-#if defined(linux)
-			matrix(0,0).real() = 1 - matTrace; // Linux
-#else // not linux
-			matrix(0,0).real(1 - matTrace);	// Windows
-#endif // not linux
+		matTrace -= matrix(0, 0).real();
+		matrix(0, 0).real(1 - matTrace);
 	}
 }
 
 static bool verifyMatrix(const MatrixXcd& mat) {
 	for (int i = 0; i < mat.rows(); ++i) {
-		if (!isZero(mat(i,i).imag())) {
+		if (!isZero(mat(i, i).imag())) {
 			return false;
 		}
 		for (int j = 0; j < i; ++j) {
-			if (!isEqual(conj(mat(i,j)), mat(j,i))) {
+			if (!isEqual(conj(mat(i, j)), mat(j, i))) {
 				return false;
 			}
 		}
@@ -130,16 +114,14 @@ int main(int argc, char* argv[]) {
 		MatrixXcd matrix;
 		do {
 			matrix = randomizeMatrix(gen, particleSizes, stateSize);
-			truncateMatrix(matrix, outputPrecision); // set the desired precision
-			correctTrace(matrix); // compensate for the limited precision
+			truncateMatrix(matrix, outputPrecision);  // set the desired precision
+			correctTrace(matrix);                     // compensate for the limited precision
 		} while (!verifyMatrix(matrix));
 		NOutputHandler::print(matrix);
-	}
-	catch (NError err) {
+	} catch (NError err) {
 		err.print();
 		return err.errorCode();
-	}
-	catch (...) {
+	} catch (...) {
 		NERROR("MAIN: Failed with unexpected error!!!");
 		return RES_UNKNOWN_ERROR;
 	}

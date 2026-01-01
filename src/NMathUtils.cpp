@@ -9,8 +9,8 @@ const double epsilonSuperRelaxed = 5E-4;
  *                          FUNCTION IMPLEMENTATIONS                         *
  *****************************************************************************/
 bool operator<(const ValType& lhs, const ValType& rhs) {
-	//double lAmp = abs(lhs);
-	//double rAmp = abs(rhs);
+	// double lAmp = abs(lhs);
+	// double rAmp = abs(rhs);
 	double lAmp = lhs.real();
 	double rAmp = rhs.real();
 	if (!isEqual(lAmp, rAmp)) {
@@ -47,25 +47,23 @@ ValType trace(const MatrixXcd& mat) {
 		strm << "Calculated a non-real trace: " << tr << endl << mat;
 		throw NError(strm.str(), false);
 	}
-#endif // __NSTRICT__
+#endif  // __NSTRICT__
 	return tr;
 }
 
 ValType trace(const MatrixXcd& lhs, const MatrixXcd& rhs) {
-	
-	MatrixXcd res = (lhs.adjoint().eval())*rhs;
+	MatrixXcd res = (lhs.adjoint().eval()) * rhs;
 
-	// This is an optimization only for hermitian matrices, and since we exapnd 
+	// This is an optimization only for hermitian matrices, and since we exapnd
 	// to support none hermitian - no longer relevant :(
 	/*
 	uint size = (uint)lhs.rows();
 	for (uint i = 0; i < size; ++i) {
-		for (uint j = 0; j < i; ++j) {
-			res += 2*(lhs(i,j)*rhs(j,i)).real();
-		}
-		res += lhs(i,i).real()*rhs(i,i).real();
+	    for (uint j = 0; j < i; ++j) {
+	        res += 2*(lhs(i,j)*rhs(j,i)).real();
+	    }
+	    res += lhs(i,i).real()*rhs(i,i).real();
 	}
 	*/
 	return res.trace();
 }
-

@@ -16,7 +16,7 @@ void NThreadPool::execute(int action, int targets, void* object, const void* cvI
 	}
 
 	// Calculate the number of targets for each thread.
-	_targetsPerThread = targets/_numOfThreads;
+	_targetsPerThread = targets / _numOfThreads;
 	_targetDelta = targets % _numOfThreads;
 
 	// Prepare the input for the threads.
@@ -44,7 +44,7 @@ void NThreadPool::execute(int action, int targets, void* object) {
 	}
 
 	// Calculate the number of targets for each thread.
-	_targetsPerThread = targets/_numOfThreads;
+	_targetsPerThread = targets / _numOfThreads;
 	_targetDelta = targets % _numOfThreads;
 
 	// Prepare the input for the threads.
@@ -68,7 +68,7 @@ void NThreadPool::execute(int action, int targets, void* object) {
  *****************************************************************************/
 void NThreadPool::secondaryThreadMain(int threadIndex) {
 	notifyThreadCreated(threadIndex);
-	while(true) {
+	while (true) {
 		// Sleep here until awakened by the main thread.
 		waitForWork();
 
@@ -89,4 +89,3 @@ void NThreadPool::createThreads() {
 	waitForThreads();
 	NLOGNUM("NThreadPool: Number of secondary threads created: ", _numOfSecondaryThreads);
 }
-

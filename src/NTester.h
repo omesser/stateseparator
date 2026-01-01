@@ -14,8 +14,8 @@ enum ExampleMatrices {
 	NEM_BELL_1,
 	NEM_BELL_2,
 	NEM_SIMPLE_SEP,  // A simple separable matrix to be separatable to 2 states
-	NEM_END	// for enumerations purposes only
-}; // ExampleMatrices
+	NEM_END          // for enumerations purposes only
+};  // ExampleMatrices
 
 
 /*****************************************************************************
@@ -24,6 +24,6 @@ enum ExampleMatrices {
 void runExample(ExampleMatrices example);
 void testRandom(const char* particleSizesStr = "2 2");
 
-#endif // N_TESTER_H
+#endif  // N_TESTER_H
 
-#endif // __NRUNONSERVER__
+#endif  // __NRUNONSERVER__

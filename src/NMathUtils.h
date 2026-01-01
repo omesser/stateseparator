@@ -8,11 +8,11 @@
 #include <Eigen/Core>
 #include <Eigen/Eigenvalues>
 
+using std::abs;
 using std::complex;
-using std::vector;
 using std::pow;
 using std::sqrt;
-using std::abs;
+using std::vector;
 
 using Eigen::MatrixXcd;
 using Eigen::MatrixXd;
@@ -93,11 +93,11 @@ bool isOnePermissive(const ValType& num) {
 }
 
 bool isEqual(const double& lhs, const double& rhs) {
-	return (abs(rhs-lhs) < epsilon);
+	return (abs(rhs - lhs) < epsilon);
 }
 
 bool isEqual(const ValType& lhs, const ValType& rhs) {
-	return (abs(rhs-lhs) < epsilon);
+	return (abs(rhs - lhs) < epsilon);
 }
 
-#endif // N_MATH_UTILS_H
+#endif  // N_MATH_UTILS_H

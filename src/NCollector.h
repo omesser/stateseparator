@@ -32,11 +32,11 @@ double collectedTime(NCollectionTypes coltype);
 #define NSTARTCOLLECTION(ct) startCollection(ct);
 #define NENDCOLLECTION(ct) endCollection(ct);
 
-#else // __NCOLLECTSTATS__ not defined
+#else  // __NCOLLECTSTATS__ not defined
 #define NINITCOLLECTOR
 #define NSTARTCOLLECTION(ct)
 #define NENDCOLLECTION(ct)
 
-#endif // __NCOLLECTSTATS__ not defined
+#endif  // __NCOLLECTSTATS__ not defined
 
-#endif // N_COLLECTOR_H
+#endif  // N_COLLECTOR_H

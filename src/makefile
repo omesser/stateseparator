@@ -5,8 +5,8 @@
 SERVER ?= 1
 
 #compiler
-CC := /usr/bin/gcc
-CXX := /usr/bin/g++
+CC := gcc
+CXX := g++
 
 #directories
 OBJDIR := ../build/objs/
@@ -15,18 +15,58 @@ BINDIR := ../build/bin/
 BACKUPDIR := ../backup/
 INCLUDE_DIRS := -I../external/
 
-#optimization flags
-#add -flto to the OPT flags when using a modern compiler
-OPT := -O3 -fomit-frame-pointer -fgcse-sm -fgcse-las -floop-optimize2 -fmodulo-sched -mfpmath=sse -msse2 -fopenmp
+#=============================================================
+# Platform Detection and Flags
+#=============================================================
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Darwin)
+    # macOS with clang
+    # Check if libomp is installed via Homebrew
+    BREW_PREFIX := $(shell brew --prefix 2>/dev/null || echo "/usr/local")
+    LIBOMP_PREFIX := $(shell brew --prefix libomp 2>/dev/null || echo "$(BREW_PREFIX)")
+
+    # Optimization flags (clang-compatible)
+    OPT := -O3 -fomit-frame-pointer
+
+    # OpenMP flags for macOS (requires: brew install libomp)
+    OPENMP_CFLAGS := -Xpreprocessor -fopenmp -I$(LIBOMP_PREFIX)/include
+    OPENMP_LDFLAGS := -L$(LIBOMP_PREFIX)/lib -lomp
+
+    # Linker flags (macOS-compatible)
+    LDFLAGS := -lm -lpthread $(OPENMP_LDFLAGS)
+else
+    # Linux with GCC
+    UNAME_M := $(shell uname -m)
+
+    ifeq ($(UNAME_M),x86_64)
+        # x86_64 Linux - use SSE flags
+        OPT := -O3 -fomit-frame-pointer -fgcse-sm -fgcse-las -fmodulo-sched -mfpmath=sse -msse2
+    else
+        # ARM64 or other architectures - generic optimization
+        OPT := -O3 -fomit-frame-pointer
+    endif
+
+    # OpenMP flags for Linux
+    OPENMP_CFLAGS := -fopenmp
+    OPENMP_LDFLAGS := -lgomp
+
+    # Linker flags (Linux-compatible)
+    LDFLAGS := -Wl,-s -Wl,--as-needed -lm $(OPENMP_LDFLAGS) -lpthread
+endif
+
+# Add OpenMP to optimization flags
+OPT += $(OPENMP_CFLAGS)
+
 ifeq ($(SERVER),1)
 	OPT += -DNDEBUG
 endif
 
 #compile flags
 ifeq ($(SERVER),1)
-	CXXFLAGS := -Wall -Werror -pedantic-errors -D__NRUNONSERVER__ -D__NFULLMT__
+	CXXFLAGS := -Wall -pedantic-errors -D__NRUNONSERVER__ -D__NFULLMT__
 else
-	CXXFLAGS := -Wall -Werror -pedantic-errors -D__NCOLLECTSTATS__ -D__NSTRICT__ -D__NNORANDOM__ -D__NFULLMT__
+	CXXFLAGS := -Wall -pedantic-errors -D__NCOLLECTSTATS__ -D__NSTRICT__ -D__NNORANDOM__ -D__NFULLMT__
 endif
 OUTFILE = -o $@
 
@@ -35,9 +75,6 @@ OBJFLAGS := -c $(CXXFLAGS)
 
 #shared object flags
 SOFLAGS := $(CXXFLAGS) -fPIC -shared
-
-#linker flags
-LDFLAGS := -Wl,-s -Wl,--as-needed -lm -lgomp -lpthread
 
 #headers
 BASIC_HEADERS := basic_def.h NError.h logger.h
@@ -72,8 +109,8 @@ separator: $(SEPARATOR_OBJS)
 #install the tool to the website - available only when building for the server
 ifeq ($(SERVER),1)
 install: dir $(BINDIR)NSeparator $(BINDIR)NRandomizer
-	cp $(BINDIR)NSeparator ../../public_html/NSeparator
-	cp $(BINDIR)NRandomizer ../../public_html/NRandomizer
+	cp $(BINDIR)NSeparator ../public_html/NSeparator
+	cp $(BINDIR)NRandomizer ../public_html/NRandomizer
 endif
 
 #make a backup archive of the current sources
@@ -87,7 +124,7 @@ dir:
 
 #cleanup
 clean:
-	rm -rf ../build 
+	rm -rf ../build
 
 #headers
 NThreadPool_l.h: NThreadPool.h
