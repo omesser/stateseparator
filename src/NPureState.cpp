@@ -6,7 +6,7 @@
  *                          PUBLIC MEMBER FUNCTIONS                          *
  *****************************************************************************/
 NPureState::NPureState(const vector<uint>& particleSizes)
-: _size(1), _particles(particleSizes.size()), _matrixBuilt(false) {
+    : _size(1), _particles(particleSizes.size()), _matrixBuilt(false) {
 	for (uint i = 0; i < _particles.size(); ++i) {
 		_particles[i].setZero(particleSizes[i]);
 		_size *= particleSizes[i];
@@ -51,19 +51,20 @@ bool NPureState::operator<(const NPureState& src) const {
 			throw NError("NPureState: Unable to compare states of different dimensions.");
 		}
 	}
-#endif // __NSTRICT__
+#endif  // __NSTRICT__
 	for (uint i = 0; i < _particles.size(); ++i) {
 		for (int j = 0; j < _particles[i].size(); ++j) {
-			if (isEqual(_particles[i][j], src._particles[i][j])) continue;
-			return (src._particles[i][j] < _particles[i][j]); // this is intentionally inverted
+			if (isEqual(_particles[i][j], src._particles[i][j]))
+				continue;
+			return (src._particles[i][j] < _particles[i][j]);  // this is intentionally inverted
 		}
 	}
-	return false; // states are identical
+	return false;  // states are identical
 }
 
 void NPureState::print(const double& prob, uint num) const {
 	if (!_matrixBuilt) {
-		throw ("NPureState: State is not finalized - no vector form.");
+		throw("NPureState: State is not finalized - no vector form.");
 	}
 	stringstream printstrm;
 	printstrm << "#" << num << ")\tweight: ";
@@ -83,8 +84,10 @@ void NPureState::print(const double& prob, uint num) const {
  *                          PRIVATE MEMBER FUNCTIONS                         *
  *****************************************************************************/
 void NPureState::buildMatrix() {
-	if (_particles.empty()) return;
-	if (_matrixBuilt) return;
+	if (_particles.empty())
+		return;
+	if (_matrixBuilt)
+		return;
 	uint numOfParticles = (uint)_particles.size();
 	_vectorForm = _particles[0];
 	for (uint i = 1; i < numOfParticles; ++i) {

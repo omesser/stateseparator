@@ -24,7 +24,7 @@ class NMixedState {
 public:
 	// Constructors
 	NMixedState(const NPureState& src, const double& minProbForState, uint targetNumberOfStates,
-			    const MatrixXcd& targetState);
+	            const MatrixXcd& targetState);
 	inline NMixedState(const NMixedState& src);
 
 	// Assignment operators
@@ -40,7 +40,7 @@ public:
 
 	// Queries
 	inline const MatrixXcd& matrix() const;
-	double distance() const; // returns the current distance from the target state
+	double distance() const;  // returns the current distance from the target state
 
 	// Output functions
 	void print() const;
@@ -51,27 +51,27 @@ private:
 	typedef StateList::iterator StateIterator;
 	typedef StateList::const_iterator CStateIterator;
 
-	uint _size;					// Overall size of the state's density matrix.
-	StateList _states;			// List of all the pure states in this mixed state.
-	uint _numOfStates;			// Number of pure states in the list.
-	MatrixXcd _matrixForm;		// This is the matrix form of the mixed state.
-	double _minProbForState;	// Disacrd states with respective probabilites below this threshold.
-    uint _targetNumberOfStates;	// Confine the solution to contain at most this many states.
-	MatrixXcd _targetState;		// The mixed state will eventually be an approximation of this density matrix.
-	MatrixXd _Q;				// Q_ij = 2*trace(rho_p_i * rho_p_j)
-	VectorXd _p;				// p_i = 2*trace(rho_p_i * rho)
-	VectorXd _probs;			// Probabilities vector - this is the result vector of the QP optimization.
-	uint _startIndex;			// Index of the first state in the Q matrix.
-								// It also represents the number of "missing" entries at the beginning of the state list.
-	uint _lastIndex;			// Index of the last state in the Q matrix.
-    vector<StateIterator> _stateIterators;
-                                // An array of StateList iterators, pointed to by their respective index in the Q matrix.
+	uint _size;                  // Overall size of the state's density matrix.
+	StateList _states;           // List of all the pure states in this mixed state.
+	uint _numOfStates;           // Number of pure states in the list.
+	MatrixXcd _matrixForm;       // This is the matrix form of the mixed state.
+	double _minProbForState;     // Disacrd states with respective probabilites below this threshold.
+	uint _targetNumberOfStates;  // Confine the solution to contain at most this many states.
+	MatrixXcd _targetState;      // The mixed state will eventually be an approximation of this density matrix.
+	MatrixXd _Q;                 // Q_ij = 2*trace(rho_p_i * rho_p_j)
+	VectorXd _p;                 // p_i = 2*trace(rho_p_i * rho)
+	VectorXd _probs;             // Probabilities vector - this is the result vector of the QP optimization.
+	uint _startIndex;            // Index of the first state in the Q matrix.
+	                   // It also represents the number of "missing" entries at the beginning of the state list.
+	uint _lastIndex;  // Index of the last state in the Q matrix.
+	vector<StateIterator> _stateIterators;
+	// An array of StateList iterators, pointed to by their respective index in the Q matrix.
 	vector<MatrixXcd> _intermediateMatrices;
-                                // An array of matrices used by the multi-threaded buildMatrix function.
-	NThreadPool* _tp;			// Pointer to the thread pool.
-	int _addQColAction;			// The action number within the thread pool for adding a new column to Q.
-	int _addQRowAction;			// The action number within the thread pool for adding a new row to Q.
-	int _buildMatrixAction;		// The action number within the thread pool for building an intermediate matrix.
+	// An array of matrices used by the multi-threaded buildMatrix function.
+	NThreadPool* _tp;        // Pointer to the thread pool.
+	int _addQColAction;      // The action number within the thread pool for adding a new column to Q.
+	int _addQRowAction;      // The action number within the thread pool for adding a new row to Q.
+	int _buildMatrixAction;  // The action number within the thread pool for building an intermediate matrix.
 
 	// Bookkeeping functions
 	inline void addState(const NPureState& newState);
@@ -81,7 +81,7 @@ private:
 	inline void compress(uint violatingIndex);
 	void shiftUp(uint violatingIndex);
 	void shiftDown(uint violatingIndex);
-    inline void buildIteratorsArray();
+	inline void buildIteratorsArray();
 	void quickSortStates(uint left, uint right, StateIterator it_start, StateIterator it_end);
 
 	// Probabilities update functions
@@ -92,7 +92,7 @@ private:
 	uint findSolution();
 
 	// Utility functions
-    void buildMatrix();
+	void buildMatrix();
 
 	// ThreadPool functions
 	friend void addQColWrapper(int, int, void*, const void*);
@@ -108,17 +108,28 @@ private:
  *                          PUBLIC MEMBER FUNCTIONS                          *
  *****************************************************************************/
 NMixedState::NMixedState(const NMixedState& src)
-: _size(src._size), _states(src._states), _numOfStates(src._numOfStates), _matrixForm(src._matrixForm),
-  _minProbForState(src._minProbForState), _targetNumberOfStates(src._targetNumberOfStates),
-  _targetState(src._targetState), _Q(src._Q), _p(src._p),
-  _probs(src._probs), // Copying the array is not really necessary (allocation would have sufficed), simply for completeness
-  _startIndex(src._startIndex), _lastIndex(src._lastIndex), _stateIterators(src._stateIterators.size()),
-  // Copying the intermediate matrices array is not really necessary (allocation would have sufficed), simply for completeness
-  _intermediateMatrices(src._intermediateMatrices),
-  _tp(src._tp), _addQColAction(src._addQColAction), _addQRowAction(src._addQRowAction),
-  _buildMatrixAction(src._buildMatrixAction)
-{
-    buildIteratorsArray();
+    : _size(src._size),
+      _states(src._states),
+      _numOfStates(src._numOfStates),
+      _matrixForm(src._matrixForm),
+      _minProbForState(src._minProbForState),
+      _targetNumberOfStates(src._targetNumberOfStates),
+      _targetState(src._targetState),
+      _Q(src._Q),
+      _p(src._p),
+      _probs(src._probs),  // Copying the array is not really necessary (allocation would have sufficed), simply for
+                           // completeness
+      _startIndex(src._startIndex),
+      _lastIndex(src._lastIndex),
+      _stateIterators(src._stateIterators.size()),
+      // Copying the intermediate matrices array is not really necessary (allocation would have sufficed), simply for
+      // completeness
+      _intermediateMatrices(src._intermediateMatrices),
+      _tp(src._tp),
+      _addQColAction(src._addQColAction),
+      _addQRowAction(src._addQRowAction),
+      _buildMatrixAction(src._buildMatrixAction) {
+	buildIteratorsArray();
 }
 
 const MatrixXcd& NMixedState::matrix() const {
@@ -132,8 +143,7 @@ const MatrixXcd& NMixedState::matrix() const {
 void NMixedState::addState(const NPureState& newState) {
 	if (_startIndex > 0) {
 		addFront(newState);
-	}
-	else {
+	} else {
 		addBack(newState);
 	}
 }
@@ -164,24 +174,23 @@ void NMixedState::eraseState(StateIterator& it) {
  * (m-1)^2 - (m-1)   (N-m)^2 - (N-m)             N-1
  * --------------- < ---------------   ==>   v < ---
  *        2                 2                     2
- * 
+ *
  * If the above condition holds, we should do a shift up because the number of stationary elements above the violating
  * index is larger than the number of stationary elements below the violating index.
  */
 void NMixedState::compress(uint violatingIndex) {
-	if ((violatingIndex - _startIndex) < ((_numOfStates - 1)/2)) {
+	if ((violatingIndex - _startIndex) < ((_numOfStates - 1) / 2)) {
 		shiftUp(violatingIndex);
-	}
-	else {
+	} else {
 		shiftDown(violatingIndex);
 	}
 }
 
 void NMixedState::buildIteratorsArray() {
-    StateIterator it = _states.begin();
-    for (uint i = _startIndex; i <= _lastIndex; ++i, ++it) {
-        _stateIterators[i] = it;
-    }
+	StateIterator it = _states.begin();
+	for (uint i = _startIndex; i <= _lastIndex; ++i, ++it) {
+		_stateIterators[i] = it;
+	}
 }
 
 
@@ -204,4 +213,4 @@ MatrixXcd operator-(const MatrixXcd& lhs, const NMixedState& rhs) {
 	return lhs - rhs.matrix();
 }
 
-#endif // N_MIXED_STATE_H
+#endif  // N_MIXED_STATE_H

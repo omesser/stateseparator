@@ -7,22 +7,22 @@
 #include <iostream>
 using std::cout;
 
-#else // run native
+#else  // run native
 
 // During development, output to log file
 #include <fstream>
 using std::ofstream;
 
-#endif // __NRUNONSERVER__
+#endif  // __NRUNONSERVER__
 
 #include <sstream>
 #include <string>
 
 using std::bad_alloc;
-using std::stringstream;
+using std::endl;
 using std::ostream;
 using std::string;
-using std::endl;
+using std::stringstream;
 
 class logger;
 
@@ -30,17 +30,17 @@ class logger;
 /*****************************************************************************
  *                               OUTPUT MACROS                               *
  *****************************************************************************/
-#define NDATA(msg)		logger::getInstance()->_data(msg);
-#define NERROR(msg)		logger::getInstance()->_error(msg);
-#define NWARNING(msg)	logger::getInstance()->_warning(msg);
+#define NDATA(msg) logger::getInstance()->_data(msg);
+#define NERROR(msg) logger::getInstance()->_error(msg);
+#define NWARNING(msg) logger::getInstance()->_warning(msg);
 
 #ifdef __NLOGALL__
-# define NLOG(msg)			logger::getInstance()->_log(msg);
-# define NLOGNUM(str,num)	logger::getInstance()->_log(str, num);
-#else // __NLOGALL__ not defined
-# define NLOG(msg)
-# define NLOGNUM(str,num)
-#endif // __NLOGALL__
+#define NLOG(msg) logger::getInstance()->_log(msg);
+#define NLOGNUM(str, num) logger::getInstance()->_log(str, num);
+#else  // __NLOGALL__ not defined
+#define NLOG(msg)
+#define NLOGNUM(str, num)
+#endif  // __NLOGALL__
 
 
 /*****************************************************************************
@@ -61,7 +61,7 @@ public:
 	inline void _log(const string& str, int num);
 	inline void _log(const string& str, unsigned int num);
 	inline void _log(const string& str, double num);
-#endif // __NLOGALL__
+#endif  // __NLOGALL__
 
 private:
 	// The singleton instance
@@ -71,7 +71,7 @@ private:
 #ifndef __NRUNONSERVER__
 	// Development - output to log file
 	ofstream _fileOutput;
-#endif // __NRUNONSERVER__
+#endif  // __NRUNONSERVER__
 	ostream& _output;
 
 	// Constrtuctor
@@ -80,7 +80,7 @@ private:
 #ifndef __NRUNONSERVER__
 	// Development - need to close the output file
 	inline ~logger();
-#endif // __NRUNONSERVER__
+#endif  // __NRUNONSERVER__
 };
 
 
@@ -143,7 +143,7 @@ void logger::_log(const string& str, double num) {
 	_output.flush();
 }
 
-#endif // __NLOGALL__
+#endif  // __NLOGALL__
 
 
 /*****************************************************************************
@@ -153,7 +153,7 @@ void logger::_log(const string& str, double num) {
 
 logger::logger() : _output(cout) {}
 
-#else // run native
+#else  // run native
 
 logger::logger() : _fileOutput("NSeparator.log"), _output(_fileOutput) {}
 
@@ -161,6 +161,6 @@ logger::~logger() {
 	_fileOutput.close();
 }
 
-#endif // __NRUNONSERVER__
+#endif  // __NRUNONSERVER__
 
-#endif // N_LOGGER_H
+#endif  // N_LOGGER_H

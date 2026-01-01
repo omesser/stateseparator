@@ -9,7 +9,8 @@ const long double pi = 3.1415926535897932384626433832795;
  *                          PUBLIC MEMBER FUNCTIONS                          *
  *****************************************************************************/
 void NRandomGenerator::randomizeVector(VectorXcd& vec, bool pureReal /*= false*/) const {
-	if (vec.size() == 0) return;
+	if (vec.size() == 0)
+		return;
 	vec[0] = 1;
 	for (int i = 1; i < vec.size(); ++i) {
 		double thetaHalf = (acos(val()) / 2);

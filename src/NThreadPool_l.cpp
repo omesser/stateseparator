@@ -10,7 +10,7 @@
 pthread_mutex_t _workLock;
 pthread_cond_t _workAvailable;
 sem_t* _threadsReady = NULL;
-volatile int _numOfSleepingThreads = 0; // TODO: not sure this is necessary
+volatile int _numOfSleepingThreads = 0;  // TODO: not sure this is necessary
 
 
 /*****************************************************************************
@@ -98,6 +98,6 @@ void NThreadPool::notifyWorkFinished(int threadIndex) {
  *****************************************************************************/
 void* startLinuxSecondaryThread(void* threadIndexPtr) {
 	int threadIndex = *static_cast<int*>(threadIndexPtr);
-	startSecondaryThread(threadIndex); // never returns
+	startSecondaryThread(threadIndex);  // never returns
 	return NULL;
 }

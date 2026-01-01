@@ -40,8 +40,8 @@ public:
 	bool operator<(const NPureState& src) const;
 
 	// Queries
-	inline uint size() const; // overall size of the state
-	inline uint numOfParticles() const; // number of basic particles that the state is built of
+	inline uint size() const;            // overall size of the state
+	inline uint numOfParticles() const;  // number of basic particles that the state is built of
 	inline const MatrixXcd& matrix() const;
 
 	// Direct access operators:
@@ -52,8 +52,8 @@ public:
 	void print(const double& prob, uint num) const;
 
 private:
-	uint _size; // overall size of the state
-	vector<VectorXcd> _particles; // the individual particles that the state is built of
+	uint _size;                    // overall size of the state
+	vector<VectorXcd> _particles;  // the individual particles that the state is built of
 	VectorXcd _vectorForm;
 	MatrixXcd _matrixForm;
 	bool _matrixBuilt;
@@ -79,10 +79,11 @@ private:
 NPureState::NPureState() : _size(0), _matrixBuilt(false) {}
 
 NPureState::NPureState(const NPureState& src)
-: _size(src._size), _particles(src._particles), _vectorForm(src._vectorForm),
-  _matrixForm(src._matrixForm), _matrixBuilt(src._matrixBuilt)
-{
-}
+    : _size(src._size),
+      _particles(src._particles),
+      _vectorForm(src._vectorForm),
+      _matrixForm(src._matrixForm),
+      _matrixBuilt(src._matrixBuilt) {}
 
 void NPureState::finalize() {
 	buildMatrix();
@@ -98,7 +99,7 @@ uint NPureState::numOfParticles() const {
 
 const MatrixXcd& NPureState::matrix() const {
 	if (!_matrixBuilt) {
-		throw ("NPureState: State is not finalized - no matrix.");
+		throw("NPureState: State is not finalized - no matrix.");
 	}
 	return _matrixForm;
 }
@@ -148,4 +149,4 @@ ValType trace(const MatrixXcd& lhs, const NPureState& rhs) {
 	return trace(lhs, rhs.matrix());
 }
 
-#endif // N_PURE_STATE_H
+#endif  // N_PURE_STATE_H

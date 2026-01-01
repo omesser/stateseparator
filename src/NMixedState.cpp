@@ -7,13 +7,13 @@
 
 #ifndef __N_MT_ADDSTATE__
 #define __N_MT_ADDSTATE__
-#endif // __N_MT_ADDSTATE__
+#endif  // __N_MT_ADDSTATE__
 
 #ifndef __N_MT_BUILDMATRIX__
 #define __N_MT_BUILDMATRIX__
-#endif // __N_MT_BUILDMATRIX__
+#endif  // __N_MT_BUILDMATRIX__
 
-#endif // __NFULLMT__
+#endif  // __NFULLMT__
 
 
 /*****************************************************************************
@@ -28,49 +28,58 @@ inline void threadBuildMatrixWrapper(int threadIndex, int start, int targets, vo
  *                          PUBLIC MEMBER FUNCTIONS                          *
  *****************************************************************************/
 NMixedState::NMixedState(const NPureState& src, const double& minProbForState, uint targetNumberOfStates,
-						 const MatrixXcd& targetState)
-: _size(src.size()), _numOfStates(1), _matrixForm(src.matrix()), _minProbForState(minProbForState),
-  _targetNumberOfStates(targetNumberOfStates), _targetState(targetState),
-  // The +1 below is for preallocation of an extra state which may be entered (and removed) in every iteration
-  // after _targetNumberOfStates was reached.
-  _Q(VectorXd::Constant(_targetNumberOfStates+1,1.0).asDiagonal()), _p(_targetNumberOfStates+1),
-  _probs(_targetNumberOfStates+1), _startIndex(0), _lastIndex(0), _stateIterators(_targetNumberOfStates+1),
-  _tp(NThreadPool::getInstance()),
-  _addQColAction(_tp->registerAction(addQColWrapper)),
-  _addQRowAction(_tp->registerAction(addQRowWrapper)),
-  _buildMatrixAction(_tp->registerAction(threadBuildMatrixWrapper))
-{
+                         const MatrixXcd& targetState)
+    : _size(src.size()),
+      _numOfStates(1),
+      _matrixForm(src.matrix()),
+      _minProbForState(minProbForState),
+      _targetNumberOfStates(targetNumberOfStates),
+      _targetState(targetState),
+      // The +1 below is for preallocation of an extra state which may be entered (and removed) in every iteration
+      // after _targetNumberOfStates was reached.
+      _Q(VectorXd::Constant(_targetNumberOfStates + 1, 1.0).asDiagonal()),
+      _p(_targetNumberOfStates + 1),
+      _probs(_targetNumberOfStates + 1),
+      _startIndex(0),
+      _lastIndex(0),
+      _stateIterators(_targetNumberOfStates + 1),
+      _tp(NThreadPool::getInstance()),
+      _addQColAction(_tp->registerAction(addQColWrapper)),
+      _addQRowAction(_tp->registerAction(addQRowWrapper)),
+      _buildMatrixAction(_tp->registerAction(threadBuildMatrixWrapper)) {
 	_states.push_back(src);
-	_p[0] = trace(src,_targetState).real();
-	_probs[0] = 1; //TODO: is this good enough?
+	_p[0] = trace(src, _targetState).real();
+	_probs[0] = 1;  // TODO: is this good enough?
 #ifdef __N_MT_BUILDMATRIX__
 	_intermediateMatrices.resize(_tp->numOfThreads());
 	for (uint i = 0; i < _intermediateMatrices.size(); ++i) {
-		_intermediateMatrices[i].setZero(_size,_size);
+		_intermediateMatrices[i].setZero(_size, _size);
 	}
-#else // single threaded execution
+#else   // single threaded execution
 	_intermediateMatrices.resize(1);
-	_intermediateMatrices[0].setZero(_size,_size);
-#endif // __N_MT_BUILDMATRIX__
-    _stateIterators[0] = _states.begin();
+	_intermediateMatrices[0].setZero(_size, _size);
+#endif  // __N_MT_BUILDMATRIX__
+	_stateIterators[0] = _states.begin();
 }
 
 NMixedState& NMixedState::operator=(const NMixedState& src) {
 #ifdef __NSTRICT__
-	if (src._size != _size) throw NError("NMixedState: Assignment should not change state size.");
-#endif // __NSTRICT__
+	if (src._size != _size)
+		throw NError("NMixedState: Assignment should not change state size.");
+#endif  // __NSTRICT__
 	if (this != &src) {
 		_states = src._states;
 		_numOfStates = src._numOfStates;
 		_matrixForm = src._matrixForm;
 		_minProbForState = src._minProbForState;
-		_targetState  = src._targetState;
+		_targetState = src._targetState;
 		_Q = src._Q.triangularView<Eigen::Lower>();
 		_p = src._p;
-		_probs = src._probs; // copying the array is not really necessary (it is already allocated), simply for completeness
+		_probs =
+		    src._probs;  // copying the array is not really necessary (it is already allocated), simply for completeness
 		_startIndex = src._startIndex;
 		_lastIndex = src._lastIndex;
-        buildIteratorsArray();
+		buildIteratorsArray();
 	}
 	return *this;
 }
@@ -121,7 +130,7 @@ void NMixedState::sortStates() {
 	uint endIndex = _startIndex + _numOfStates - 1;
 	StateIterator it_start = _states.begin();
 	StateIterator it_end = it_start;
-	
+
 	for (uint i = 1; i < _numOfStates; ++i) {
 		++it_end;
 	}
@@ -129,7 +138,6 @@ void NMixedState::sortStates() {
 }
 // QuickSort O(NlogN)
 void NMixedState::quickSortStates(uint left, uint right, StateIterator it_start, StateIterator it_end) {
-	
 	// Stop
 	if (right - left < 2) {
 		return;
@@ -138,60 +146,66 @@ void NMixedState::quickSortStates(uint left, uint right, StateIterator it_start,
 	uint j = right;
 	StateIterator it_i = it_start;
 	StateIterator it_j = it_end;
-	double pivot = _probs[ (uint)((left + right) / 2)];
+	double pivot = _probs[(uint)((left + right) / 2)];
 
 	/* partition */
 	while (i <= j) {
 		while (_probs[i] > pivot) {
-			++i; ++it_i;
+			++i;
+			++it_i;
 		}
 		while (_probs[j] < pivot) {
-			--j; --it_j;
+			--j;
+			--it_j;
 		}
-        if (i <= j) {
+		if (i <= j) {
 			// Swapping:
 			std::swap(_probs[i], _probs[j]);
 			std::swap(*it_i, *it_j);
-	        ++i; ++it_i;
-            --j; --it_j;
+			++i;
+			++it_i;
+			--j;
+			--it_j;
 		}
 	}
 	/* Recursion */
-	if (left < j) quickSortStates(left, j, it_start, it_j);
-	if (i < right) quickSortStates(i, right, it_i, it_end);
+	if (left < j)
+		quickSortStates(left, j, it_start, it_j);
+	if (i < right)
+		quickSortStates(i, right, it_i, it_end);
 }
 
 
 // Alternative (slower) selection sort
 /*
 void NMixedState::sortStates() {
-	NLOG("NMixedState: Sorting states.");
-	uint lastIndex = _startIndex + _numOfStates - 1;
-	// Index of highest probability state
-	uint maxIndex;
-	
-	StateIterator it_i = _states.begin();
-	StateIterator it_j;
-	StateIterator it_max;
-	
-	// Selection sort
-	for (uint i = _startIndex; i < lastIndex; ++i, ++it_i) {
-		maxIndex = i;
-		it_j = it_i;
-		it_max = it_i;
-		++it_j;
-		for (uint j = i + 1; j <= lastIndex; ++j, ++it_j) {
-			if (_probs[j] > _probs[maxIndex]) { 
-				maxIndex = j;
-				it_max = it_j;
-			}
-		}
-		if (maxIndex != i) {	
-			// Swapping:
-			std::swap(_probs[i], _probs[maxIndex]);
-			std::swap(*it_i, *it_max);
-		}
-	}
+    NLOG("NMixedState: Sorting states.");
+    uint lastIndex = _startIndex + _numOfStates - 1;
+    // Index of highest probability state
+    uint maxIndex;
+
+    StateIterator it_i = _states.begin();
+    StateIterator it_j;
+    StateIterator it_max;
+
+    // Selection sort
+    for (uint i = _startIndex; i < lastIndex; ++i, ++it_i) {
+        maxIndex = i;
+        it_j = it_i;
+        it_max = it_i;
+        ++it_j;
+        for (uint j = i + 1; j <= lastIndex; ++j, ++it_j) {
+            if (_probs[j] > _probs[maxIndex]) {
+                maxIndex = j;
+                it_max = it_j;
+            }
+        }
+        if (maxIndex != i) {
+            // Swapping:
+            std::swap(_probs[i], _probs[maxIndex]);
+            std::swap(*it_i, *it_max);
+        }
+    }
 }
 */
 
@@ -203,14 +217,14 @@ void NMixedState::addFront(const NPureState& newState) {
 	_states.push_front(newState);
 	--_startIndex;
 	++_numOfStates;
-    _stateIterators[_startIndex] = _states.begin();
+	_stateIterators[_startIndex] = _states.begin();
 
 	// Update Q
 #ifdef __N_MT_ADDSTATE__
 	_tp->execute(_addQColAction, _numOfStates, this, &newState);
-#else // single threaded execution
+#else   // single threaded execution
 	addQCol(0, _numOfStates, newState);
-#endif // __N_MT_ADDSTATE__
+#endif  // __N_MT_ADDSTATE__
 
 	// Update p
 	_p[_startIndex] = trace(newState, _targetState).real();
@@ -221,14 +235,14 @@ void NMixedState::addBack(const NPureState& newState) {
 	_states.push_back(newState);
 	++_lastIndex;
 	++_numOfStates;
-    _stateIterators[_lastIndex] = --_states.end();
+	_stateIterators[_lastIndex] = --_states.end();
 
 	// Update Q
 #ifdef __N_MT_ADDSTATE__
 	_tp->execute(_addQRowAction, _numOfStates, this, &newState);
-#else // single threaded execution
+#else   // single threaded execution
 	addQRow(0, _numOfStates, newState);
-#endif // __N_MT_ADDSTATE__
+#endif  // __N_MT_ADDSTATE__
 
 	// Update p
 	_p[_lastIndex] = trace(newState, _targetState).real();
@@ -236,50 +250,52 @@ void NMixedState::addBack(const NPureState& newState) {
 
 void NMixedState::shiftUp(uint violatingIndex) {
 	NLOG("NMixedState: Performing shift up.");
-    uint oldJ = violatingIndex-1;
-    StateIterator it = _stateIterators[violatingIndex];
-	eraseState(it); // remove the stale state
+	uint oldJ = violatingIndex - 1;
+	StateIterator it = _stateIterators[violatingIndex];
+	eraseState(it);  // remove the stale state
 
 	// shift up
 	for (uint newJ = violatingIndex; newJ > _startIndex; --newJ, --oldJ) {
-        _stateIterators[newJ] = --it;
+		_stateIterators[newJ] = --it;
 		uint newI = _lastIndex;
 		for (; newI > violatingIndex; --newI) {
-			_Q(newI, newJ) = _Q(newI,oldJ);
+			_Q(newI, newJ) = _Q(newI, oldJ);
 		}
-		for (uint oldI = newI-1; newI > newJ; --newI, --oldI) {
-			_Q(newI,newJ) = _Q(oldI,oldJ);
+		for (uint oldI = newI - 1; newI > newJ; --newI, --oldI) {
+			_Q(newI, newJ) = _Q(oldI, oldJ);
 		}
 		_p[newJ] = _p[oldJ];
 	}
 	++_startIndex;
 #ifdef __NSTRICT__
-	if (it != _states.begin()) throw NError("NMixedState: The state list is inconsistent.");
-#endif // __NSTRICT__
+	if (it != _states.begin())
+		throw NError("NMixedState: The state list is inconsistent.");
+#endif  // __NSTRICT__
 }
 
 void NMixedState::shiftDown(uint violatingIndex) {
 	NLOG("NMixedState: Performing shift down.");
-    uint oldI = violatingIndex+1;
-    StateIterator it = _stateIterators[violatingIndex];
-	eraseState(it); // remove the stale state
+	uint oldI = violatingIndex + 1;
+	StateIterator it = _stateIterators[violatingIndex];
+	eraseState(it);  // remove the stale state
 
 	// shift down
 	for (uint newI = violatingIndex; newI < _lastIndex; ++newI, ++oldI, ++it) {
-        _stateIterators[newI] = it;
+		_stateIterators[newI] = it;
 		uint newJ = _startIndex;
 		for (; newJ < violatingIndex; ++newJ) {
-			_Q(newI,newJ) = _Q(oldI,newJ);
+			_Q(newI, newJ) = _Q(oldI, newJ);
 		}
-		for (uint oldJ = newJ+1; newJ < newI; ++newJ, ++oldJ) {
-			_Q(newI,newJ) = _Q(oldI,oldJ);
+		for (uint oldJ = newJ + 1; newJ < newI; ++newJ, ++oldJ) {
+			_Q(newI, newJ) = _Q(oldI, oldJ);
 		}
 		_p[newI] = _p[oldI];
 	}
 	--_lastIndex;
 #ifdef __NSTRICT__
-	if (it != _states.end()) throw NError("NMixedState: The state list is inconsistent.");
-#endif // __NSTRICT__
+	if (it != _states.end())
+		throw NError("NMixedState: The state list is inconsistent.");
+#endif  // __NSTRICT__
 }
 
 void NMixedState::removeMinState() {
@@ -325,7 +341,7 @@ void NMixedState::removeMinState() {
  *    a) Remove the corresponding state from the states list.
  *    b) Shift the Q and p entries to eliminate the gap that was formed.
  *    c) Return to step 1.
- * 
+ *
  * The algorithm terminates when no such violating probability is found.
  */
 void NMixedState::minimize() {
@@ -383,18 +399,19 @@ uint NMixedState::findSolution() {
 			violatingIndex = i;
 		}
 	}
-	if (isZero(sum)) throw NError("NMixedState: Calculated 0 sum."); // avoid division by zero
-	
+	if (isZero(sum))
+		throw NError("NMixedState: Calculated 0 sum.");  // avoid division by zero
+
 	// Without forcing sum==1 we allow none-unitary matrices to be approximated
 	/*
 	if (!isOne(sum)) {
-		_probs /= sum;
-		// After normalizing, the violating entry might not be violating anymore.
-		if (violatingIndex <= _lastIndex) {
-			if (_probs[violatingIndex] >= _minProbForState) {
-				violatingIndex = _lastIndex + 1;
-			}
-		}
+	    _probs /= sum;
+	    // After normalizing, the violating entry might not be violating anymore.
+	    if (violatingIndex <= _lastIndex) {
+	        if (_probs[violatingIndex] >= _minProbForState) {
+	            violatingIndex = _lastIndex + 1;
+	        }
+	    }
 	}
 	*/
 	return violatingIndex;
@@ -404,36 +421,36 @@ void NMixedState::buildMatrix() {
 	// Build intermediate matrices
 #ifdef __N_MT_BUILDMATRIX__
 	_tp->execute(_buildMatrixAction, _numOfStates, this);
-#else // Single threaded execution
+#else   // Single threaded execution
 	buildIntermediateMatrix(0, 0, _numOfStates);
-#endif // __N_MT_BUILDMATRIX__
+#endif  // __N_MT_BUILDMATRIX__
 	// Sum up to the actual matrix
 	_matrixForm.noalias() = _intermediateMatrices[0];
 #ifdef __N_MT_BUILDMATRIX__
 	for (uint i = 1; i < _intermediateMatrices.size(); ++i) {
 		_matrixForm.noalias() += _intermediateMatrices[i];
 	}
-#endif // __N_MT_BUILDMATRIX__
+#endif  // __N_MT_BUILDMATRIX__
 
 #ifdef __NSTRICT__
 	// Disabled to allow more generic matrices to be approximated
-	//if (!isOnePermissive(_matrixForm.trace())) throw NError("NMixedState: Matrix trace does not equal 1.");
-	//if (!isOne(_matrixForm.trace())) throw NError("NMixedState: Matrix trace does not equal 1.");
-#endif // __NSTRICT__
+	// if (!isOnePermissive(_matrixForm.trace())) throw NError("NMixedState: Matrix trace does not equal 1.");
+	// if (!isOne(_matrixForm.trace())) throw NError("NMixedState: Matrix trace does not equal 1.");
+#endif  // __NSTRICT__
 }
 
 void NMixedState::addQCol(int start, int targets, const NPureState& newState) {
 	// set the loop boundary indices
 	start += _startIndex;
 	uint end = start + targets;
-	if ((uint)start == _startIndex) { // adjust for the diagonal element
+	if ((uint)start == _startIndex) {  // adjust for the diagonal element
 		++start;
 	}
-    StateIterator it = _stateIterators[start];
+	StateIterator it = _stateIterators[start];
 
 	// calculate the traces
 	for (uint i = start, j = _startIndex; i < end; ++i, ++it) {
-		_Q(i,j) = trace(*it, newState).real();
+		_Q(i, j) = trace(*it, newState).real();
 	}
 }
 
@@ -441,21 +458,21 @@ void NMixedState::addQRow(int start, int targets, const NPureState& newState) {
 	// set the loop boundary indices
 	start += _startIndex;
 	uint end = start + targets;
-	if (end == _lastIndex+1) { // adjust for the diagonal element
+	if (end == _lastIndex + 1) {  // adjust for the diagonal element
 		--end;
 	}
-    StateIterator it = _stateIterators[start];
+	StateIterator it = _stateIterators[start];
 
 	// calculate the traces
 	for (uint i = _lastIndex, j = start; j < end; ++j, ++it) {
-		_Q(i,j) = trace(*it, newState).real();
+		_Q(i, j) = trace(*it, newState).real();
 	}
 }
 
 void NMixedState::buildIntermediateMatrix(int threadIndex, int start, int targets) {
 	int i = _startIndex + start;
 	int end = i + targets;
-    StateIterator it = _stateIterators[i];
+	StateIterator it = _stateIterators[i];
 	_intermediateMatrices[threadIndex].noalias() = (it->matrix() * _probs[i]);
 	for (++i, ++it; i < end; ++i, ++it) {
 		_intermediateMatrices[threadIndex].noalias() += (it->matrix() * _probs[i]);

@@ -1,74 +1,111 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
-<head>
-<link rel="stylesheet" href="style.css" type="text/css">
+  <head>
+    <link rel="stylesheet" href="style.css" type="text/css" />
 
-<!-- Google Analytics -->
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    <!-- Google Analytics -->
+    <script>
+      (function (i, s, o, g, r, a, m) {
+        i["GoogleAnalyticsObject"] = r;
+        ((i[r] =
+          i[r] ||
+          function () {
+            (i[r].q = i[r].q || []).push(arguments);
+          }),
+          (i[r].l = 1 * new Date()));
+        ((a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]));
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m);
+      })(window, document, "script", "//www.google-analytics.com/analytics.js", "ga");
 
-  ga('create', 'REPLACEME', 'auto');
-  ga('require', 'displayfeatures');
-  ga('send', 'pageview');
-</script>
-<!-- End Google Analytics -->
+      ga("create", "REPLACEME", "auto");
+      ga("require", "displayfeatures");
+      ga("send", "pageview");
+    </script>
+    <!-- End Google Analytics -->
+  </head>
+  <body>
+    <div id="head"></div>
+    <div id="header">
+      <h1>Welcome to the State Separator (V2.0)</h1>
+    </div>
+    <div id="navigation">
+      <ul id="navbar">
+        <li><a href="index.html">Home</a></li>
+        <li>
+          <a href="#head">Examples</a>
+          <ul>
+            <li><a href="simpleSeparable.html">Simple Separable State</a></li>
+            <li></li>
+            <li><a href="complexSeparable.html">Complex Separable State</a></li>
+            <li></li>
+            <li><a href="barelySeparable.html">Barely Separable State</a></li>
+            <li></li>
+            <li><a href="slightlyEntangled.html">Slightly Entangled State</a></li>
+            <li></li>
+            <li><a href="bellState.html">Bell State</a></li>
+            <li></li>
+            <li><a href="wState.html">W State</a></li>
+            <li></li>
+            <li><a href="BoundEntanglementState.html">Bound-entangled State</a></li>
+            <li></li>
+          </ul>
+        </li>
+        <li><a href="documentation.html">Documentation</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
 
-</head>
-<body>
-	<div id="head">
-	</div>
-	<div id="header">
-		<h1>Welcome to the State Separator (V2.0)</h1>
-	</div>
-	<div id="navigation">
-		<ul id="navbar">
-			<li><a href="index.html">Home</a></li>
-			<li><a href="#head">Examples</a>
-				<ul>
-					<li><a href="simpleSeparable.html">Simple Separable State</a><li>
-					<li><a href="complexSeparable.html">Complex Separable State</a><li>
-					<li><a href="barelySeparable.html">Barely Separable State</a><li>
-					<li><a href="slightlyEntangled.html">Slightly Entangled State</a><li>
-					<li><a href="bellState.html">Bell State</a><li>
-					<li><a href="wState.html">W State</a><li>
-					<li><a href="BoundEntanglementState.html">Bound-entangled State</a><li>
-				</ul>
-			</li>
-			<li><a href="documentation.html">Documentation</a></li>
-			<li><a href="contact.html">Contact</a></li>
-		</ul>
-	</div>
-	
-	<div id="documentation">
-	<h1>Original developer: Naftaly Shalev, B.Sc.</h1>
-	<p>e-mail: <a href="mailto:nafta.shalev@gmail.com" target="_blank">nafta.shalev@gmail.com</a></p>
-	<img src="naftalys.jpg" alt="Naftaly Shalev" width="200" height="240">
-	</div>
-	
-	<div id="documentation">
-	<h1>V2.0 developer / Optimization / QA: Oded Messer, B.Sc.</h1>
-	<p>e-mail: <a href="mailto:odedmesser@gmail.com" target="_blank">odedmesser@gmail.com</a></p>
-	<img src="odedm.jpg" alt="Oded Messer" width="200" height="240">
-	</div>
-	
-	<div id="documentation">
-	<h1>Project supervisor: Joseph Avron, PhD.</h1>
-	<p>e-mail: <a href="mailto:avronj@gmail.com" target="_blank">avronj@gmail.com</a></p>
-	<p>home-page: <a href="http://physics.technion.ac.il/~faculty/?u=avron" target="_blank">http://physics.technion.ac.il/~faculty/?u=avron</a></p>
-	<img src="yosis.jpg" alt="Joseph Avron" width="200" height="240">
-	</div>
-	
-	<div id="documentation">
-	<h1>Project advisor: Oded Kenneth, PhD.</h1>
-	<p>e-mail: <a href="mailto:kenneth@ph.technion.ac.il" target="_blank">kenneth@ph.technion.ac.il</a></p>
-	<p>home-page: <a href="http://www.tau.ac.il/~quantum/Kenneth/Kenneth.html" target="_blank">http://www.tau.ac.il/~quantum/Kenneth/Kenneth.html</a></p>
-	<img src="odedk.jpg" alt="Oded Kenneth" width="200" height="240">
-	</div>
-	<div id="footer">
-		<address>Developed at the Technion - Israel Institute of Technology, Haifa, Israel</address>
-	</div>
-</body>
+    <div id="documentation">
+      <h1>Original developer: Naftaly Shalev, B.Sc.</h1>
+      <p>
+        e-mail:
+        <a href="mailto:nafta.shalev@gmail.com" target="_blank">nafta.shalev@gmail.com</a>
+      </p>
+      <img src="naftalys.jpg" alt="Naftaly Shalev" width="200" height="240" />
+    </div>
+
+    <div id="documentation">
+      <h1>V2.0 developer / Optimization / QA: Oded Messer, B.Sc.</h1>
+      <p>
+        e-mail:
+        <a href="mailto:odedmesser@gmail.com" target="_blank">odedmesser@gmail.com</a>
+      </p>
+      <img src="odedm.jpg" alt="Oded Messer" width="200" height="240" />
+    </div>
+
+    <div id="documentation">
+      <h1>Project supervisor: Joseph Avron, PhD.</h1>
+      <p>
+        e-mail:
+        <a href="mailto:avronj@gmail.com" target="_blank">avronj@gmail.com</a>
+      </p>
+      <p>
+        home-page:
+        <a href="http://physics.technion.ac.il/~faculty/?u=avron" target="_blank">
+          http://physics.technion.ac.il/~faculty/?u=avron
+        </a>
+      </p>
+      <img src="yosis.jpg" alt="Joseph Avron" width="200" height="240" />
+    </div>
+
+    <div id="documentation">
+      <h1>Project advisor: Oded Kenneth, PhD.</h1>
+      <p>
+        e-mail:
+        <a href="mailto:kenneth@ph.technion.ac.il" target="_blank">kenneth@ph.technion.ac.il</a>
+      </p>
+      <p>
+        home-page:
+        <a href="http://www.tau.ac.il/~quantum/Kenneth/Kenneth.html" target="_blank">
+          http://www.tau.ac.il/~quantum/Kenneth/Kenneth.html
+        </a>
+      </p>
+      <img src="odedk.jpg" alt="Oded Kenneth" width="200" height="240" />
+    </div>
+    <div id="footer">
+      <address>Developed at the Technion - Israel Institute of Technology, Haifa, Israel</address>
+    </div>
+  </body>
 </html>

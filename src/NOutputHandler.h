@@ -42,8 +42,8 @@ void NOutputHandler::setPrecision(uint outputPrecision) {
  *****************************************************************************/
 void NOutputHandler::calcWidth() {
 	_componentWidth = _outputPrecision + 2;
-	_outputWidth = (_componentWidth)*2 + 2; // this does not include the leading '-' of the real component
+	_outputWidth = (_componentWidth) * 2 + 2;  // this does not include the leading '-' of the real component
 	_pureImaginary = _outputWidth - 1;
 }
 
-#endif // N_OUTPUT_HANDLER_H
+#endif  // N_OUTPUT_HANDLER_H

@@ -14,7 +14,7 @@ public:
 
 #ifdef __NNORANDOM__
 	inline static void create(uint seed);
-#endif // __NNORANDOM__
+#endif  // __NNORANDOM__
 
 	inline uint seed() const;
 
@@ -35,11 +35,11 @@ private:
 	NRandomGenerator(uint seed = time(0));
 
 	// Utility functions
-	inline double val() const; // returns a random number in [-1, 1]
+	inline double val() const;  // returns a random number in [-1, 1]
 
 	// Masking copy constructor and assignment operator
-	inline NRandomGenerator(const NRandomGenerator& src); // ERROR
-	inline void operator=(const NRandomGenerator& src);	  // ERROR
+	inline NRandomGenerator(const NRandomGenerator& src);  // ERROR
+	inline void operator=(const NRandomGenerator& src);    // ERROR
 };
 
 
@@ -50,8 +50,7 @@ NRandomGenerator* NRandomGenerator::getInstance() {
 	if (_theInstance == NULL) {
 		try {
 			_theInstance = new NRandomGenerator();
-		}
-		catch (bad_alloc) {
+		} catch (bad_alloc) {
 			throw NError("NRandomGenerator: Unable to create the NRandomGenerator instance.");
 		}
 	}
@@ -63,13 +62,12 @@ void NRandomGenerator::create(uint seed) {
 	if (_theInstance == NULL) {
 		try {
 			_theInstance = new NRandomGenerator(seed);
-		}
-		catch (bad_alloc) {
+		} catch (bad_alloc) {
 			throw NError("NRandomGenerator: Unable to create the NRandomGenerator instance.");
 		}
 	}
 }
-#endif // __NNORANDOM__
+#endif  // __NNORANDOM__
 
 uint NRandomGenerator::seed() const {
 	return _seed;
@@ -94,4 +92,4 @@ void NRandomGenerator::operator=(const NRandomGenerator& src) {
 	throw NError("NRandomGenerator: Assignment operator was invoked.");
 }
 
-#endif // N_RANDOM_GENERATOR_H
+#endif  // N_RANDOM_GENERATOR_H

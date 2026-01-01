@@ -2,38 +2,38 @@
 #include "NOutputHandler.h"
 #include "NSeparator.h"
 
-#ifndef __NRUNONSERVER__  
+#ifndef __NRUNONSERVER__
 
 #include <iostream>
-#include "NTester.h" // this is used for native runs only - for testing during development
+#include "NTester.h"  // this is used for native runs only - for testing during development
 
-using std::cout;
 using std::cin;
+using std::cout;
 using std::endl;
 
 uint getScenario() {
 	cout << "1) 2 2 2 2 2" << endl
-		 << "2) 2 3 7" << endl
-		 << "3) barely separable example" << endl
-		 << "4) slightly entangled example" << endl
-		 << "5) first bell state" << endl
-		 << "6) second bell state" << endl
-		 << "7) simple separable state" << endl;
+	     << "2) 2 3 7" << endl
+	     << "3) barely separable example" << endl
+	     << "4) slightly entangled example" << endl
+	     << "5) first bell state" << endl
+	     << "6) second bell state" << endl
+	     << "7) simple separable state" << endl;
 	cout << "Please choose one of the scenarios above: ";
 	uint choice = 0;
 	cin >> choice;
-	if (cin.fail()) { // TODO: handle errors better
+	if (cin.fail()) {  // TODO: handle errors better
 		exit(1);
 	}
-	if (choice < 1 || choice > 7) { // TODO: handle errors better
+	if (choice < 1 || choice > 7) {  // TODO: handle errors better
 		exit(2);
 	}
 	return choice;
 }
 
-#else // This code is for the server version of the State Separator
+#else  // This code is for the server version of the State Separator
 
-/* 
+/*
  * This function verifies that the given matrix is a valid density matrix.
  * There is a similar function in NRandomizer.cpp for the NRandomizer executable.
  * See Randomizer project in this solution.
@@ -44,22 +44,22 @@ static void verifyMatrix(const MatrixXcd& mat) {
 	if (!isOnePermissive(mat.trace())) {
 		// Only warning
 		NError(RES_MATRIX_TRACE_NOT_ONE).print_warn();
-		//throw NError(RES_MATRIX_TRACE_NOT_ONE);
+		// throw NError(RES_MATRIX_TRACE_NOT_ONE);
 	}
 	// TEST 2: Hermiticity :  Real vals on diagonal, conjugates on all other entries
 	for (int i = 0; i < mat.rows(); ++i) {
-		if (!isZero(mat(i,i).imag())) {
+		if (!isZero(mat(i, i).imag())) {
 			// Only warning
 			NError(RES_MATRIX_NOT_HERMITIAN).print_warn();
 			break;
-			//throw NError(RES_MATRIX_NOT_HERMITIAN);
+			// throw NError(RES_MATRIX_NOT_HERMITIAN);
 		}
 		for (int j = 0; j < i; ++j) {
-			if (!isEqual(conj(mat(i,j)), mat(j,i))) {
+			if (!isEqual(conj(mat(i, j)), mat(j, i))) {
 				// Only warning
 				NError(RES_MATRIX_NOT_HERMITIAN).print_warn();
 				break;
-				//throw NError(RES_MATRIX_NOT_HERMITIAN);
+				// throw NError(RES_MATRIX_NOT_HERMITIAN);
 			}
 		}
 	}
@@ -92,13 +92,13 @@ void printResults(const NResult& res) {
 	} else {
 		if (res._reason == NREASON_DISTANCE) {
 			finalstrm << "The system is separable." << endl;
-		} else if (res._distance > 0.0005) { //Originally 0.005
+		} else if (res._distance > 0.0005) {  // Originally 0.005
 			finalstrm << "The system is most likely entangled." << endl;
 		} else {
 			finalstrm << "The system might be entangled." << endl;
 		}
 	}
-	
+
 	finalstrm << "The Eigenvalues of the partially-transposed (Peres test) matrix are: " << endl;
 	// Printing the EVs with nice formatting
 	NOutputHandler::printStrm(finalstrm, res._peresEVs);
@@ -148,22 +148,22 @@ NResult runOnServer(int argc, char* argv1[]) {
 	}
 
 	// Now we are ready to start the actual work - separate the matrix!
-	return NSeparator::getInstance()->separate(matrix, particleSizes, targetDistance, minProbForState, targetNumberOfStates, accuracyBoost);
+	return NSeparator::getInstance()->separate(matrix, particleSizes, targetDistance, minProbForState,
+	                                           targetNumberOfStates, accuracyBoost);
 }
 
-#endif // __NRUNONSERVER__
+#endif  // __NRUNONSERVER__
 
 /*****************************************************************************
  *                               MAIN FUNCTION                               *
  *****************************************************************************/
 int main(int argc, char* argv[]) {
 	try {
-		
-#ifdef __NRUNONSERVER__ 		
+#ifdef __NRUNONSERVER__
 		NResult res = runOnServer(argc, argv);
 		printResults(res);
 
-#else // run native tests - development only
+#else  // run native tests - development only
 
 		if (argc > 1) {
 			throw NError(RES_INVALID_ARGS_NUMBER);
@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
 		uint runScenario = getScenario();
 
 		switch (runScenario) {
-		case 1: // Test one random matrix - default size is "2 2"
+		case 1:  // Test one random matrix - default size is "2 2"
 			testRandom("2 2 2 2 2");
 			break;
 		case 2:
@@ -196,14 +196,12 @@ int main(int argc, char* argv[]) {
 		default:;
 		}
 
-#endif // __NRUNONSERVER__
+#endif  // __NRUNONSERVER__
 
-	}
-	catch (NError err) {
+	} catch (NError err) {
 		err.print();
 		return err.errorCode();
-	}
-	catch (...) {
+	} catch (...) {
 		NERROR("MAIN: Failed with unexpected error!!!");
 		return RES_UNKNOWN_ERROR;
 	}

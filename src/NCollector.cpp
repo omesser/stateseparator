@@ -23,7 +23,7 @@ void endCollection(NCollectionTypes coltype) {
 }
 
 double collectedTime(NCollectionTypes coltype) {
-	return double(clocks[coltype])/CLOCKS_PER_SEC;
+	return double(clocks[coltype]) / CLOCKS_PER_SEC;
 }
 
-#endif // __NCOLLECTSTATS__
+#endif  // __NCOLLECTSTATS__

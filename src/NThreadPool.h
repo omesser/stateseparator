@@ -78,7 +78,7 @@ private:
 	// Secondary threads' main function
 	// TODO: not sure this function is necessary
 	friend void startSecondaryThread(int threadIndex);
-	void secondaryThreadMain(int threadIndex); // never returns
+	void secondaryThreadMain(int threadIndex);  // never returns
 	void notifyThreadCreated(int threadIndex);
 
 	// Run functions
@@ -97,8 +97,8 @@ private:
 	void notifyWorkFinished(int threadIndex);
 
 	// Masking copy constructor and assignment operator
-	inline NThreadPool(const NThreadPool& src);		// ERROR
-	inline void operator=(const NThreadPool& src);	// ERROR
+	inline NThreadPool(const NThreadPool& src);     // ERROR
+	inline void operator=(const NThreadPool& src);  // ERROR
 };
 
 
@@ -118,8 +118,8 @@ int NThreadPool::numOfThreads() const {
 }
 
 int NThreadPool::registerAction(iivcv func) {
-	if(_iivcvFuncs.size() > INT_MAX) {
-		throw ("NThreadPool: size of actionNum exceeded max int! Something went wrong.");
+	if (_iivcvFuncs.size() > INT_MAX) {
+		throw("NThreadPool: size of actionNum exceeded max int! Something went wrong.");
 	}
 	int actionNum = static_cast<int>(_iivcvFuncs.size());
 	_iivcvFuncs.push_back(func);
@@ -127,10 +127,10 @@ int NThreadPool::registerAction(iivcv func) {
 }
 
 int NThreadPool::registerAction(iiiv func) {
-	if(_iiivFuncs.size() > INT_MAX) {
-		throw ("NThreadPool: size of actionNum exceeded max int! Something went wrong.");
+	if (_iiivFuncs.size() > INT_MAX) {
+		throw("NThreadPool: size of actionNum exceeded max int! Something went wrong.");
 	}
-	int actionNum = static_cast<int>(_iiivFuncs.size());	
+	int actionNum = static_cast<int>(_iiivFuncs.size());
 	_iiivFuncs.push_back(func);
 	return actionNum;
 }
@@ -140,19 +140,26 @@ int NThreadPool::registerAction(iiiv func) {
  *                          PRIVATE MEMBER FUNCTIONS                         *
  *****************************************************************************/
 NThreadPool::NThreadPool()
-: _numOfThreads(numOfCPUs()), _numOfSecondaryThreads(_numOfThreads-1), _targetsPerThread(0), _targetDelta(0),
-  _currentObject(NULL), _cvInput(NULL), _actionType(NAT_END), _actionNum(0)
-{
+    : _numOfThreads(numOfCPUs()),
+      _numOfSecondaryThreads(_numOfThreads - 1),
+      _targetsPerThread(0),
+      _targetDelta(0),
+      _currentObject(NULL),
+      _cvInput(NULL),
+      _actionType(NAT_END),
+      _actionNum(0) {
 	initThreadPool();
 }
 
 void NThreadPool::run_iivcv(NThreadPool* tp, int threadIndex) {
-	int start = (threadIndex *  tp->_targetsPerThread) +  tp->_targetDelta; // calculate the starting index for this thread
+	int start =
+	    (threadIndex * tp->_targetsPerThread) + tp->_targetDelta;  // calculate the starting index for this thread
 	tp->_iivcvFuncs[tp->_actionNum](start, tp->_targetsPerThread, tp->_currentObject, tp->_cvInput);
 }
 
 void NThreadPool::run_iiiv(NThreadPool* tp, int threadIndex) {
-	int start = (threadIndex *  tp->_targetsPerThread) +  tp->_targetDelta; // calculate the starting index for this thread
+	int start =
+	    (threadIndex * tp->_targetsPerThread) + tp->_targetDelta;  // calculate the starting index for this thread
 	tp->_iiivFuncs[tp->_actionNum](threadIndex, start, tp->_targetsPerThread, tp->_currentObject);
 }
 
@@ -172,4 +179,4 @@ void startSecondaryThread(int threadIndex) {
 	NThreadPool::_theInstance->secondaryThreadMain(threadIndex);
 }
 
-#endif // N_THREAD_POOL_H
+#endif  // N_THREAD_POOL_H

@@ -25,20 +25,20 @@ ifeq ($(UNAME_S),Darwin)
     # Check if libomp is installed via Homebrew
     BREW_PREFIX := $(shell brew --prefix 2>/dev/null || echo "/usr/local")
     LIBOMP_PREFIX := $(shell brew --prefix libomp 2>/dev/null || echo "$(BREW_PREFIX)")
-    
+
     # Optimization flags (clang-compatible)
     OPT := -O3 -fomit-frame-pointer
-    
+
     # OpenMP flags for macOS (requires: brew install libomp)
     OPENMP_CFLAGS := -Xpreprocessor -fopenmp -I$(LIBOMP_PREFIX)/include
     OPENMP_LDFLAGS := -L$(LIBOMP_PREFIX)/lib -lomp
-    
+
     # Linker flags (macOS-compatible)
     LDFLAGS := -lm -lpthread $(OPENMP_LDFLAGS)
 else
     # Linux with GCC
     UNAME_M := $(shell uname -m)
-    
+
     ifeq ($(UNAME_M),x86_64)
         # x86_64 Linux - use SSE flags
         OPT := -O3 -fomit-frame-pointer -fgcse-sm -fgcse-las -fmodulo-sched -mfpmath=sse -msse2
@@ -46,11 +46,11 @@ else
         # ARM64 or other architectures - generic optimization
         OPT := -O3 -fomit-frame-pointer
     endif
-    
+
     # OpenMP flags for Linux
     OPENMP_CFLAGS := -fopenmp
     OPENMP_LDFLAGS := -lgomp
-    
+
     # Linker flags (Linux-compatible)
     LDFLAGS := -Wl,-s -Wl,--as-needed -lm $(OPENMP_LDFLAGS) -lpthread
 endif
@@ -124,7 +124,7 @@ dir:
 
 #cleanup
 clean:
-	rm -rf ../build 
+	rm -rf ../build
 
 #headers
 NThreadPool_l.h: NThreadPool.h

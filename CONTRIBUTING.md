@@ -355,11 +355,38 @@ php -i | grep disable_functions
 
 ## Contributing
 
+### Setup Pre-commit Hooks
+
+This project uses [pre-commit](https://pre-commit.com/) to run linters before each commit:
+
+```bash
+# Install pre-commit
+pip install pre-commit
+
+# Install the git hooks
+pre-commit install
+
+# (Optional) Run against all files
+pre-commit run --all-files --show-diff-on-failure
+```
+
+**Required tools for full linting:**
+- `clang-format` - C++ formatting (usually bundled with clang/LLVM)
+- `cppcheck` - C++ static analysis (`brew install cppcheck` / `apt install cppcheck`)
+- `htmlhint` - HTML linting (`npm install -g htmlhint`)
+- `php` - PHP syntax check (bundled with PHP)
+- `phpcs` - PHP CodeSniffer (`composer global require squizlabs/php_codesniffer`)
+- `shellcheck` - Shell script linting (`brew install shellcheck` / `apt install shellcheck`)
+- `hadolint` - Dockerfile linting (`brew install hadolint`)
+
+### Contribution Workflow
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Run tests: `./tests/test_docker.sh stateseparator`
-5. Submit a pull request
+4. Run linters: `pre-commit run --all-files --show-diff-on-failure`
+5. Run tests: `./tests/test_docker.sh stateseparator`
+6. Submit a pull request
 
 ---
 
