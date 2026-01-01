@@ -1,0 +1,53 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  FORCE_COLOR: "1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install linting tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck php-cli php-codesniffer
+
+      - run: pip install pre-commit
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - run: pre-commit run --all-files --show-diff-on-failure
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - run: docker build -t stateseparator .
+
+      - run: ./tests/test_docker.sh stateseparator
+
+      - run: |
+          docker run --rm -v ${{ github.workspace }}/tests:/tests stateseparator \
+            /tests/test_separator.sh /var/www/html/NSeparator /var/www/html/NRandomizer
