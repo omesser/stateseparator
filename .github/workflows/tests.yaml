@@ -32,6 +32,10 @@ jobs:
           wget -qO /tmp/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
           sudo install /tmp/hadolint /usr/local/bin/hadolint
 
+          # Install shfmt for shell formatting
+          wget -qO /tmp/shfmt https://github.com/mvdan/sh/releases/latest/download/shfmt_v3.10.0_linux_amd64
+          sudo install /tmp/shfmt /usr/local/bin/shfmt
+
       - run: pip install pre-commit
 
       - uses: actions/cache@v4
