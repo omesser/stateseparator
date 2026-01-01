@@ -28,6 +28,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cppcheck php-cli php-codesniffer
 
+          # Install hadolint for Dockerfile linting
+          wget -qO /tmp/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+          sudo install /tmp/hadolint /usr/local/bin/hadolint
+
       - run: pip install pre-commit
 
       - uses: actions/cache@v4
