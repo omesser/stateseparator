@@ -72,9 +72,21 @@ if ($separate) {
                 <h1>The density matrix to be analyzed:</h1>
                 <textarea name="matrix" rows="30" wrap="off"><?php
                 if ($separate) {
-                    echo "$matrix\n\n";
+                    // Clean previous output from matrix - keep only the matrix rows
+                    // Output markers that indicate where previous results start
+                    $outputMarkers = array('The system is', 'ERROR:', 'The Eigenvalues');
+                    $cleanMatrix = $matrix;
+                    foreach ($outputMarkers as $marker) {
+                        $pos = strpos($cleanMatrix, $marker);
+                        if ($pos !== false) {
+                            $cleanMatrix = substr($cleanMatrix, 0, $pos);
+                        }
+                    }
+                    $cleanMatrix = trim($cleanMatrix);
 
-                    exec("./NSeparator \"$particleSizes\" \"$matrix\" \"$targetDistance\" \"$minProbForState\" \"$targetNumberOfStates\" \"$precision\" \"$accuracyBoost\"", $separatorOutput, $returnValue);
+                    echo "$cleanMatrix\n\n";
+
+                    exec("./NSeparator \"$particleSizes\" \"$cleanMatrix\" \"$targetDistance\" \"$minProbForState\" \"$targetNumberOfStates\" \"$precision\" \"$accuracyBoost\"", $separatorOutput, $returnValue);
                     foreach ($separatorOutput as $val) {
                         echo "$val\n";
                     }
