@@ -1,21 +1,26 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <?php
-if ($_POST['separate'] or $_POST['randomize']) {
-    $particleSizes = $_POST['particleSizes'];
-    $targetDistance = $_POST['targetDistance'];
-    $minProbForState = $_POST['minProbForState'];
-    $targetNumberOfStates = $_POST['targetNumberOfStates'];
-    $precision = $_POST['precision'];
-    $accuracyBoost = $_POST['accuracyBoost'];
+$separate = $_POST['separate'] ?? null;
+$randomize = $_POST['randomize'] ?? null;
+
+if ($separate || $randomize) {
+    $particleSizes = $_POST['particleSizes'] ?? "2 2";
+    $targetDistance = $_POST['targetDistance'] ?? "";
+    $minProbForState = $_POST['minProbForState'] ?? "";
+    $targetNumberOfStates = $_POST['targetNumberOfStates'] ?? "";
+    $precision = $_POST['precision'] ?? "3";
+    $accuracyBoost = $_POST['accuracyBoost'] ?? "0";
 } else {
     $particleSizes = "2   2";
     $targetDistance = "";
     $minProbForState = "";
     $targetNumberOfStates = "";
+    $precision = "3";
+    $accuracyBoost = "0";
 }
-if ($_POST['separate']) {
-    $matrix = $_POST['matrix'];
+if ($separate) {
+    $matrix = $_POST['matrix'] ?? "";
 }
 ?>
 
@@ -65,15 +70,15 @@ if ($_POST['separate']) {
                 <h1>The system:</h1>
                 <input type="text" name="particleSizes" value="<?php echo $particleSizes?>" style="width:100%" Rows=1 />
                 <h1>The density matrix to be analyzed:</h1>
-                <textarea name="matrix" Rows=30" wrap="off"><?php
-                if ($_POST['separate']) {
+                <textarea name="matrix" rows="30" wrap="off"><?php
+                if ($separate) {
                     echo "$matrix\n\n";
 
                     exec("./NSeparator \"$particleSizes\" \"$matrix\" \"$targetDistance\" \"$minProbForState\" \"$targetNumberOfStates\" \"$precision\" \"$accuracyBoost\"", $separatorOutput, $returnValue);
                     foreach ($separatorOutput as $val) {
                         echo "$val\n";
                     }
-                } elseif ($_POST['randomize']) {
+                } elseif ($randomize) {
                     exec("./NRandomizer \"$particleSizes\" \"$precision\"", $randomizerOutput, $returnValue);
                     foreach ($randomizerOutput as $val) {
                         echo "$val\n";
