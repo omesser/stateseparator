@@ -284,6 +284,50 @@ Quantum state representations:
 
 ---
 
+## Testing
+
+### Docker Integration Tests (Recommended)
+
+Run the full integration test suite against a Docker container:
+
+```bash
+# Build the image first
+docker build -t stateseparator .
+
+# Run integration tests
+./tests/test_docker.sh stateseparator
+```
+
+This tests:
+- Container startup and health
+- Binary execution inside container
+- HTTP server response
+- PHP processing
+- Form submission (separable and entangled states)
+
+### Binary Unit Tests
+
+Run standalone binary tests inside Docker:
+
+```bash
+docker run --rm -v $(pwd)/tests:/tests stateseparator \
+  /tests/test_separator.sh /var/www/html/NSeparator /var/www/html/NRandomizer
+```
+
+This tests:
+- Maximally mixed state (separable)
+- Bell state (entangled)
+- Pure product state (separable)
+- Multiple precision levels (3, 6, 9)
+- 3-qubit systems
+- Error handling (invalid inputs)
+- Random state generation
+
+> **Note**: Native macOS builds may fail due to deprecated POSIX semaphores (`sem_init`).
+> Use Docker for reliable testing.
+
+---
+
 ## Troubleshooting
 
 ### Build Errors
@@ -314,7 +358,7 @@ php -i | grep disable_functions
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test with both `SERVER=0` and `SERVER=1` builds
+4. Run tests: `./tests/test_docker.sh stateseparator`
 5. Submit a pull request
 
 ---

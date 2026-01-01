@@ -1,11 +1,7 @@
-// Eigen Dense module
-// Includes all modules for dense matrix/vector operations
-
-#ifndef EIGEN_DENSE_MODULE_H
-#define EIGEN_DENSE_MODULE_H
-
 #include "Core"
+#include "LU"
 #include "Cholesky"
+#include "QR"
+#include "SVD"
+#include "Geometry"
 #include "Eigenvalues"
-
-#endif // EIGEN_DENSE_MODULE_H
