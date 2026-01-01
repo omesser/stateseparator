@@ -19,13 +19,9 @@ void NRandomGenerator::randomizeVector(VectorXcd& vec, bool pureReal /*= false*/
 		vec[i] = sin(thetaHalf);
 		if (!pureReal) {
 			double phi = pi * val();
-#if defined(linux)
-			vec[i].imag() = (vec[i].real() * sin(phi));	// Linux
-			vec[i].real() = (vec[i].real() * cos(phi));	// Linux
-#else // not linux
-			vec[i].imag(vec[i].real() * sin(phi));		// Windows
-			vec[i].real(vec[i].real() * cos(phi));		// Windows
-#endif // not linux
+			double r = vec[i].real();
+			vec[i].imag(r * sin(phi));
+			vec[i].real(r * cos(phi));
 		}
 	}
 }

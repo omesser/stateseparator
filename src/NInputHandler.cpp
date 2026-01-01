@@ -154,11 +154,6 @@ void NInputHandler::extract(stringstream& strm, ValType& val) {
 			throw NError(RES_INVALID_MATRIX_VAL);
 		}
 	}
-#if defined(linux)
-	val.real() = realVal;	// Linux
-	val.imag() = imagVal;	// Linux
-#else // not linux
-	val.real(realVal);		// Windows
-	val.imag(imagVal);		// Windows
-#endif // not linux
+	val.real(realVal);
+	val.imag(imagVal);
 }

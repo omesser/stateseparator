@@ -2,6 +2,7 @@
 #define N_THREAD_POOL_H
 
 #include <vector>
+#include <climits>
 #include "NError.h"
 
 using std::vector;

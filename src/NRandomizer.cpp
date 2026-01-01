@@ -44,29 +44,17 @@ static void truncateMatrix(MatrixXcd& matrix, uint outputPrecision) {
 			double imagVal;
 			realValStrm >> realVal;
 			imagValStrm >> imagVal;
-#if defined(linux)
-			matrix(i,j).real() = realVal;	// Linux
-			matrix(i,j).imag() = imagVal;	// Linux
-			matrix(j,i).real() = realVal;	// Linux
-			matrix(j,i).imag() = -imagVal;	// Linux
-#else // not linux
-			matrix(i,j).real(realVal);	// Windows
-			matrix(i,j).imag(imagVal);	// Windows
-			matrix(j,i).real(realVal);	// Windows
-			matrix(j,i).imag(-imagVal);	// Windows
-#endif // not linux
+			matrix(i,j).real(realVal);
+			matrix(i,j).imag(imagVal);
+			matrix(j,i).real(realVal);
+			matrix(j,i).imag(-imagVal);
 		}
 		stringstream diagStrm;
 		double diagVal;
 		diagStrm << fixed << setprecision(outputPrecision) << matrix(i,i).real();
 		diagStrm >> diagVal;
-#if defined(linux)
-		matrix(i,i).real() = diagVal;	// Linux
-		matrix(i,i).imag() = 0;			// Linux
-#else // not linux
-		matrix(i,i).real(diagVal);	// Windows
-		matrix(i,i).imag(0);		// Windows
-#endif // not linux
+		matrix(i,i).real(diagVal);
+		matrix(i,i).imag(0);
 	}
 }
 
@@ -74,11 +62,7 @@ static void correctTrace(MatrixXcd& matrix) {
 	double matTrace = trace(matrix).real();
 	if (!isEqual(matTrace, 1)) {
 		matTrace -= matrix(0,0).real();
-#if defined(linux)
-			matrix(0,0).real() = 1 - matTrace; // Linux
-#else // not linux
-			matrix(0,0).real(1 - matTrace);	// Windows
-#endif // not linux
+		matrix(0,0).real(1 - matTrace);
 	}
 }
 

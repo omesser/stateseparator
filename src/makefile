@@ -37,8 +37,15 @@ ifeq ($(UNAME_S),Darwin)
     LDFLAGS := -lm -lpthread $(OPENMP_LDFLAGS)
 else
     # Linux with GCC
-    # Optimization flags (GCC-specific)
-    OPT := -O3 -fomit-frame-pointer -fgcse-sm -fgcse-las -floop-optimize2 -fmodulo-sched -mfpmath=sse -msse2
+    UNAME_M := $(shell uname -m)
+    
+    ifeq ($(UNAME_M),x86_64)
+        # x86_64 Linux - use SSE flags
+        OPT := -O3 -fomit-frame-pointer -fgcse-sm -fgcse-las -fmodulo-sched -mfpmath=sse -msse2
+    else
+        # ARM64 or other architectures - generic optimization
+        OPT := -O3 -fomit-frame-pointer
+    endif
     
     # OpenMP flags for Linux
     OPENMP_CFLAGS := -fopenmp
