@@ -7,14 +7,15 @@
 uint NInputHandler::getParticleSizes(const string& particleSizesStr, vector<uint>& particleSizes) {
 	uint stateSize = 1;
 	stringstream sizeStrm(particleSizesStr);
-	while (!sizeStrm.eof()) {
-		uint currsize = 0;
-		if (!extract(sizeStrm, currsize)) throw NError(RES_INVALID_SIZES);
+	uint currsize = 0;
+	while (extract(sizeStrm, currsize)) {
 		if (currsize == 0) throw NError(RES_INVALID_SIZES);
 		particleSizes.push_back(currsize);
 		stateSize *= currsize;
 		if (stateSize > maxMatrixSize) throw NError(RES_STATE_TOO_BIG);
+		currsize = 0;
 	}
+	if (particleSizes.empty()) throw NError(RES_INVALID_SIZES);
 	return stateSize;
 }
 
@@ -87,8 +88,9 @@ uint NInputHandler::getOutputPrecision(const string& outputPrecisionStr) {
  *****************************************************************************/
 bool NInputHandler::extract(stringstream& strm, uint& store) {
 	double temp;
-	strm >> temp >> ws;
+	strm >> temp;
 	if (strm.fail()) return false;
+	strm >> ws;  // consume trailing whitespace separately
 	store = (int)temp;
 	return ((double)store == temp);
 }

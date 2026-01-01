@@ -3,6 +3,10 @@ build/
 *.o
 *.so
 
+# Compiled binaries in public_html (built by make install on host)
+public_html/NSeparator
+public_html/NRandomizer
+
 # Git
 .git
 .gitignore

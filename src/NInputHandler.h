@@ -45,8 +45,10 @@ bool NInputHandler::convert(const string& str, double& store) {
 }
 
 bool NInputHandler::extract(stringstream& strm, double& store) {
-	strm >> store >> ws;
-	return (!strm.fail());
+	strm >> store;
+	if (strm.fail()) return false;
+	strm >> ws;  // consume trailing whitespace separately
+	return true;
 }
 
 #endif // N_INPUT_HANDLER_H
