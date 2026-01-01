@@ -24,6 +24,9 @@ jobs:
           python-version: '3.12'
 
       - name: Install linting tools
+        env:
+          DEBIAN_FRONTEND: noninteractive
+          NEEDRESTART_MODE: a
         run: |
           sudo apt-get update
           sudo apt-get install -y cppcheck php-cli php-codesniffer

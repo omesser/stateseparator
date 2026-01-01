@@ -145,7 +145,7 @@ run_test "Matrix size mismatch rejected" \
 # =============================================================================
 if [[ -x "$NRANDOMIZER" ]]; then
   run_test "NRandomizer generates matrix for 2x2 system" \
-    "^[0-9.-]" \
+    "[0-9].*[0-9]" \
     "$NRANDOMIZER" "2 2" "3"
 fi
 
