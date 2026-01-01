@@ -24,19 +24,20 @@ jobs:
           python-version: '3.12'
 
       - name: Install linting tools
-        env:
-          DEBIAN_FRONTEND: noninteractive
-          NEEDRESTART_MODE: a
         run: |
           sudo apt-get update
-          sudo apt-get install -y cppcheck php-cli php-codesniffer
+          sudo apt-get install -y cppcheck php-cli
+
+          curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar
+          sudo mv phpcbf.phar /usr/local/bin/phpcbf
+          sudo chmod +x /usr/local/bin/phpcbf
 
           # Install hadolint for Dockerfile linting
           wget -qO /tmp/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
           sudo install /tmp/hadolint /usr/local/bin/hadolint
 
           # Install shfmt for shell formatting
-          wget -qO /tmp/shfmt https://github.com/mvdan/sh/releases/latest/download/shfmt_v3.10.0_linux_amd64
+          wget -qO /tmp/shfmt https://github.com/mvdan/sh/releases/download/v3.11.0/shfmt_v3.11.0_linux_amd64
           sudo install /tmp/shfmt /usr/local/bin/shfmt
 
       - run: pip install pre-commit
