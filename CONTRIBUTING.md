@@ -181,14 +181,41 @@ make SERVER=0 all
 
 ### Option 1: Using Docker (Recommended)
 
+#### Local Build (current architecture only)
+
 ```bash
 # Build the Docker image
 docker build -t stateseparator .
 
-# Run the container
-docker run -p 8080:80 stateseparator
+# Run the container in detached mode
+docker run -d -p 8080:80 --name stateseparator stateseparator
 
 # Access at http://localhost:8080
+
+# To stop and remove the container:
+docker stop stateseparator && docker rm stateseparator
+```
+
+#### Multi-Architecture Build (for deployment)
+
+To build an image that works on both ARM64 (Apple Silicon) and AMD64 (Intel/AMD Linux servers):
+
+```bash
+# Create a new builder instance (one-time setup)
+docker buildx create --name multiarch --use
+
+# Build and push multi-arch image to Docker Hub (or other registry)
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -t yourusername/stateseparator:latest \
+  --push .
+
+# Or build for a specific platform and load locally
+docker buildx build --platform linux/amd64 -t stateseparator:amd64 --load .
+```
+
+To run the AMD64 image on an ARM Mac (for testing):
+```bash
+docker run -d -p 8080:80 --platform linux/amd64 --name stateseparator stateseparator:amd64
 ```
 
 ### Option 2: Local PHP Development Server

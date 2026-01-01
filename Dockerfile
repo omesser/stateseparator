@@ -1,5 +1,8 @@
 # State Separator - Quantum State Separability Checker
 # Multi-stage build: compile C++ backend, then serve with Apache+PHP
+#
+# Supports multi-architecture builds (linux/amd64, linux/arm64)
+# Build with: docker buildx build --platform linux/amd64,linux/arm64 -t stateseparator .
 
 # =============================================================================
 # Stage 1: Build the C++ executables
