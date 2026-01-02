@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include "NInputHandler.h"
 #include "NOutputHandler.h"
 #include "NSeparator.h"
@@ -143,7 +145,7 @@ NResult runOnServer(int argc, char* argv1[]) {
 
 	// boost accuracy?
 	bool accuracyBoost = false;
-	if (argc == 8 && argv1[7] == "1") {
+	if (argc == 8 && strcmp(argv1[7], "1") == 0) {
 		accuracyBoost = true;
 	}
 

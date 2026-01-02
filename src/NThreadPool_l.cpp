@@ -1,6 +1,5 @@
 #include <unistd.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <sched.h>
 #include "NThreadPool.h"
 
@@ -9,7 +8,12 @@
 //		 so this is somewhat of a compromise.
 pthread_mutex_t _workLock;
 pthread_cond_t _workAvailable;
-sem_t* _threadsReady = NULL;
+
+// Thread-ready synchronization (replaces deprecated sem_t on macOS)
+pthread_mutex_t _readyLock;
+pthread_cond_t _readyCond;
+int* _threadReady = NULL;  // Array of flags: 0 = busy, 1 = ready
+
 volatile int _numOfSleepingThreads = 0;  // TODO: not sure this is necessary
 
 
@@ -24,24 +28,30 @@ inline void* startLinuxSecondaryThread(void* threadIndexPtr);
  *                    OS-SPECIFIC PRIVATE MEMBER FUNCTIONS                   *
  *****************************************************************************/
 void NThreadPool::initThreadPool() {
-	_threadsReady = new sem_t[_numOfThreads];
+	// Initialize thread-ready flags (replaces semaphores for macOS compatibility)
+	_threadReady = new int[_numOfThreads];
 	for (int i = 0; i < _numOfThreads; ++i) {
-		if (sem_init(&_threadsReady[i], 0, 0) < 0) {
-			throw NError("NThreadPool: Failed to initialize a semaphore.");
-		}
+		_threadReady[i] = 0;  // Not ready initially
 	}
-	if (pthread_mutex_init(&_workLock, NULL) < 0) {
+	if (pthread_mutex_init(&_readyLock, NULL) != 0) {
+		throw NError("NThreadPool: Failed to initialize the _readyLock mutex.");
+	}
+	if (pthread_cond_init(&_readyCond, NULL) != 0) {
+		throw NError("NThreadPool: Failed to initialize the _readyCond condition variable.");
+	}
+	if (pthread_mutex_init(&_workLock, NULL) != 0) {
 		throw NError("NThreadPool: Failed to initialize the _workLock mutex.");
 	}
-	if (pthread_cond_init(&_workAvailable, NULL) < 0) {
+	if (pthread_cond_init(&_workAvailable, NULL) != 0) {
 		throw NError("NThreadPool: Failed to initialize the _workAvailable condition variable.");
 	}
 }
 
 void NThreadPool::notifyThreadCreated(int threadIndex) {
-	if (sem_post(&_threadsReady[threadIndex]) < 0) {
-		throw NError("NThreadPool: Failed to post a semaphore.");
-	}
+	pthread_mutex_lock(&_readyLock);
+	_threadReady[threadIndex] = 1;
+	pthread_cond_broadcast(&_readyCond);
+	pthread_mutex_unlock(&_readyLock);
 }
 
 int NThreadPool::numOfCPUs() const {
@@ -65,11 +75,14 @@ void NThreadPool::wakeupThreads() {
 }
 
 void NThreadPool::waitForThreads() {
+	pthread_mutex_lock(&_readyLock);
 	for (int i = 1; i < _numOfThreads; ++i) {
-		if (sem_wait(&_threadsReady[i]) < 0) {
-			throw NError("NThreadPool: Failed to wait on a semaphore.");
+		while (_threadReady[i] == 0) {
+			pthread_cond_wait(&_readyCond, &_readyLock);
 		}
+		_threadReady[i] = 0;  // Reset for next round
 	}
+	pthread_mutex_unlock(&_readyLock);
 }
 
 void NThreadPool::waitForWork() {
@@ -87,9 +100,10 @@ void NThreadPool::waitForWork() {
 }
 
 void NThreadPool::notifyWorkFinished(int threadIndex) {
-	if (sem_post(&_threadsReady[threadIndex]) < 0) {
-		throw NError("NThreadPool: Failed to post a semaphore.");
-	}
+	pthread_mutex_lock(&_readyLock);
+	_threadReady[threadIndex] = 1;
+	pthread_cond_broadcast(&_readyCond);
+	pthread_mutex_unlock(&_readyLock);
 }
 
 
