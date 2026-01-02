@@ -91,7 +91,7 @@ fi
 # Test 6: Check PHP is working
 echo -n "Test: PHP is processing calculate.php... "
 CONTENT=$(curl -s http://localhost:8081/calculate.php)
-if echo "$CONTENT" | grep -q "density matrix"; then
+if echo "$CONTENT" | grep -q "Parameters"; then
   echo -e "${GREEN}PASSED${NC}"
 else
   echo -e "${RED}FAILED${NC}"
