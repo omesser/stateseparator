@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
 			correctTrace(matrix);                     // compensate for the limited precision
 		} while (!verifyMatrix(matrix));
 		NOutputHandler::print(matrix);
-	} catch (NError err) {
+	} catch (const NError& err) {
 		err.print();
 		return err.errorCode();
 	} catch (...) {

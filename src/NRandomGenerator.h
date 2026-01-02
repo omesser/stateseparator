@@ -50,7 +50,7 @@ NRandomGenerator* NRandomGenerator::getInstance() {
 	if (_theInstance == NULL) {
 		try {
 			_theInstance = new NRandomGenerator();
-		} catch (bad_alloc) {
+		} catch (const std::bad_alloc&) {
 			throw NError("NRandomGenerator: Unable to create the NRandomGenerator instance.");
 		}
 	}
@@ -62,7 +62,7 @@ void NRandomGenerator::create(uint seed) {
 	if (_theInstance == NULL) {
 		try {
 			_theInstance = new NRandomGenerator(seed);
-		} catch (bad_alloc) {
+		} catch (const std::bad_alloc&) {
 			throw NError("NRandomGenerator: Unable to create the NRandomGenerator instance.");
 		}
 	}

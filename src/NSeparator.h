@@ -125,7 +125,7 @@ NSeparator* NSeparator::getInstance() {
 	if (_theInstance == NULL) {
 		try {
 			_theInstance = new NSeparator();
-		} catch (bad_alloc) {
+		} catch (const std::bad_alloc&) {
 			throw NError("NSeparator: Unable to create the NSeparator instance.");
 		}
 	}

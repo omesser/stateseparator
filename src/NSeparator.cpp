@@ -141,7 +141,7 @@ NResult NSeparator::separate(const MatrixXcd& src, const vector<uint>& particleS
 		if (result._reason == NREASON_NONE) {
 			result._reason = NREASON_S;
 		}
-	} catch (NError err) {
+	} catch (const NError& err) {
 		// If the failure is critical (e.g. memory allocation failure) we should escalate the error.
 		// Otherwise, just set the termination reason to fail which means numerical error.
 		if (err.criticalFailure())
