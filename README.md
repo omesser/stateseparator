@@ -276,4 +276,4 @@ The matrix elements are expected in the following formats:
 - Note: `i` without number will be interpreted as: `1*i` i.e. `3+i = 3+1i`
 
 
-*Developed at the Technion - Israel Institute of Technology, Haifa, Israel*
+*Developed at the the Technion - Israel Institute of Technology, Haifa, Israel*
