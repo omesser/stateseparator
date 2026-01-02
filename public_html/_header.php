@@ -34,4 +34,16 @@
         else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
           document.documentElement.setAttribute('data-theme', 'dark');
       })();
+
+      // Persist textarea sizes across page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        const matrixTextarea = document.querySelector('textarea[name="matrix"]');
+        if (matrixTextarea) {
+          const savedHeight = localStorage.getItem('matrixHeight');
+          if (savedHeight) matrixTextarea.style.height = savedHeight;
+          new ResizeObserver(() => {
+            localStorage.setItem('matrixHeight', matrixTextarea.style.height || matrixTextarea.offsetHeight + 'px');
+          }).observe(matrixTextarea);
+        }
+      });
     </script>

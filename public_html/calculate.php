@@ -44,10 +44,15 @@ if ($separate) {
         }
     }
     $matrixInput = trim($cleanMatrix);
+    $matrixRows = substr_count($matrixInput, "\n") + 1;
+    error_log("[NSeparator] Executing: particleSizes=$particleSizes, matrixRows=$matrixRows, precision=$precision, accuracyBoost=$accuracyBoost");
     exec("./NSeparator \"$particleSizes\" \"$matrixInput\" \"$targetDistance\" \"$minProbForState\" \"$targetNumberOfStates\" \"$precision\" \"$accuracyBoost\"", $separatorOutput, $returnValue);
+    error_log("[NSeparator] Completed: exitCode=$returnValue");
     $outputResult = implode("\n", $separatorOutput);
 } elseif ($randomize) {
+    error_log("[NRandomizer] Executing: particleSizes=$particleSizes, precision=$precision");
     exec("./NRandomizer \"$particleSizes\" \"$precision\"", $randomizerOutput, $returnValue);
+    error_log("[NRandomizer] Completed: exitCode=$returnValue");
     $matrixInput = implode("\n", $randomizerOutput);
     $outputResult = "Random matrix generated. Click 'Separate' to analyze.";
 }
