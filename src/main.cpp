@@ -198,7 +198,7 @@ int main(int argc, char* argv[]) {
 
 #endif  // __NRUNONSERVER__
 
-	} catch (NError err) {
+	} catch (const NError& err) {
 		err.print();
 		return err.errorCode();
 	} catch (...) {
