@@ -1,8 +1,18 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 <?php
+$pageTitle = 'Results - State Separator';
+$pageDescription = 'State Separator analysis results.';
+$currentPage = 'home';
+
 $separate = $_POST['separate'] ?? null;
 $randomize = $_POST['randomize'] ?? null;
+
+// Example title persistence
+$exampleTitle = $_POST['exampleTitle'] ?? "";
+$exampleDesc = $_POST['exampleDesc'] ?? "";
+$isExample = !empty($exampleTitle);
+if ($isExample) {
+    $currentPage = 'examples';
+}
 
 if ($separate || $randomize) {
     $particleSizes = $_POST['particleSizes'] ?? "2 2";
@@ -19,110 +29,101 @@ if ($separate || $randomize) {
     $precision = "3";
     $accuracyBoost = "0";
 }
+
+$matrixInput = "";
+$outputResult = "";
+
 if ($separate) {
     $matrix = $_POST['matrix'] ?? "";
+    $outputMarkers = array('The system is', 'ERROR:', 'The Eigenvalues');
+    $cleanMatrix = $matrix;
+    foreach ($outputMarkers as $marker) {
+        $pos = strpos($cleanMatrix, $marker);
+        if ($pos !== false) {
+            $cleanMatrix = substr($cleanMatrix, 0, $pos);
+        }
+    }
+    $matrixInput = trim($cleanMatrix);
+    $matrixRows = substr_count($matrixInput, "\n") + 1;
+    error_log("[NSeparator] Executing: particleSizes=$particleSizes, matrixRows=$matrixRows, precision=$precision, accuracyBoost=$accuracyBoost");
+    exec("./NSeparator \"$particleSizes\" \"$matrixInput\" \"$targetDistance\" \"$minProbForState\" \"$targetNumberOfStates\" \"$precision\" \"$accuracyBoost\"", $separatorOutput, $returnValue);
+    error_log("[NSeparator] Completed: exitCode=$returnValue");
+    $outputResult = implode("\n", $separatorOutput);
+} elseif ($randomize) {
+    error_log("[NRandomizer] Executing: particleSizes=$particleSizes, precision=$precision");
+    exec("./NRandomizer \"$particleSizes\" \"$precision\"", $randomizerOutput, $returnValue);
+    error_log("[NRandomizer] Completed: exitCode=$returnValue");
+    $matrixInput = implode("\n", $randomizerOutput);
+    $outputResult = "Random matrix generated. Click 'Separate' to analyze.";
 }
+
+include '_header.php';
+include '_nav.php';
 ?>
 
-<html>
-<head>
-<link rel="stylesheet" href="style.css" type="text/css">
-
-<!-- Google Analytics -->
-<!--script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'REPLACEME', 'auto');
-  ga('require', 'displayfeatures');
-  ga('send', 'pageview');
-</script-->
-<!-- End Google Analytics -->
-
-</head>
-<body>
-    <div id="header">
-        <h1>Welcome to the State Separator (V2.0)</h1>
-    </div>
-    <div id="navigation">
-        <ul id="navbar">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="#head">Examples</a>
-                <ul>
-                    <li><a href="simpleSeparable.html">Simple Separable State</a><li>
-                    <li><a href="complexSeparable.html">Complex Separable State</a><li>
-                    <li><a href="barelySeparable.html">Barely Separable State</a><li>
-                    <li><a href="slightlyEntangled.html">Slightly Entangled State</a><li>
-                    <li><a href="bellState.html">Bell State</a><li>
-                    <li><a href="wState.html">W State</a><li>
-                    <li><a href="BoundEntanglementState.html">Bound-entangled State</a><li>
-                </ul>
-            </li>
-            <li><a href="documentation.html">Documentation</a></li>
-            <li><a href="contact.html">Contact</a></li>
-        </ul>
-    </div>
-    <div id="main">
+    <main>
+      <div class="container">
         <form method="post" action="./calculate.php">
-            <div id="data">
-                <h1>The system:</h1>
-                <input type="text" name="particleSizes" value="<?php echo $particleSizes?>" style="width:100%" Rows=1 />
-                <h1>The density matrix to be analyzed:</h1>
-                <textarea name="matrix" rows="30" wrap="off"><?php
-                if ($separate) {
-                    // Clean previous output from matrix - keep only the matrix rows
-                    // Output markers that indicate where previous results start
-                    $outputMarkers = array('The system is', 'ERROR:', 'The Eigenvalues');
-                    $cleanMatrix = $matrix;
-                    foreach ($outputMarkers as $marker) {
-                        $pos = strpos($cleanMatrix, $marker);
-                        if ($pos !== false) {
-                            $cleanMatrix = substr($cleanMatrix, 0, $pos);
-                        }
-                    }
-                    $cleanMatrix = trim($cleanMatrix);
-
-                    echo "$cleanMatrix\n\n";
-
-                    exec("./NSeparator \"$particleSizes\" \"$cleanMatrix\" \"$targetDistance\" \"$minProbForState\" \"$targetNumberOfStates\" \"$precision\" \"$accuracyBoost\"", $separatorOutput, $returnValue);
-                    foreach ($separatorOutput as $val) {
-                        echo "$val\n";
-                    }
-                } elseif ($randomize) {
-                    exec("./NRandomizer \"$particleSizes\" \"$precision\"", $randomizerOutput, $returnValue);
-                    foreach ($randomizerOutput as $val) {
-                        echo "$val\n";
-                    }
-                }
-                ?></textarea>
+          <div class="results-grid">
+            <div class="matrix-card">
+<?php if ($exampleTitle) : ?>
+              <div class="example-header">
+                <h1><?php echo htmlspecialchars($exampleTitle); ?></h1>
+                <p><?php echo htmlspecialchars($exampleDesc); ?></p>
+              </div>
+              <input type="hidden" name="exampleTitle" value="<?php echo htmlspecialchars($exampleTitle); ?>" />
+              <input type="hidden" name="exampleDesc" value="<?php echo htmlspecialchars($exampleDesc); ?>" />
+<?php endif; ?>
+              <h2>System: <input type="text" name="particleSizes" value="<?php echo htmlspecialchars($particleSizes); ?>" /></h2>
+              <textarea name="matrix" rows="6"><?php echo htmlspecialchars($matrixInput); ?></textarea>
             </div>
-            <div id="options">
-                <h1>Optional parameters:</h1>
-                <p>
-                    Target distance:<br><input type="text" name="targetDistance" value="" maxlength=20><br><br>
-                    Minimum probability per state:<br><input type="text" name="minProbForState" value="" maxlength=20><br><br>
-                    Target number of states:<br><input type="text" name="targetNumberOfStates" value="" maxlength=20><br><br>
-                    Output precision: <select name="precision">
-                        <option value="3">3</option>
-                        <option value="6">6</option>
-                        <option value="9">9</option>
-                        <option value="12">12</option>
-                        <option value="15">15</option>
-                    </select><br><Br>
-                    Accuracy boost: <br>
-                    <input type="radio" style="width:10%" name="accuracyBoost" value="1"> On <br>
-                    <input type="radio" style="width:10%" name="accuracyBoost" checked="checked"  value="0">  Off (default) <br>
-                    <br>
-                    <input type="submit" name="separate" value=" Separate "/><br>
-                    <input type="submit" name="randomize" value=" Randomize "/>
-                </p>
+
+            <div class="output-card">
+              <h2>Output</h2>
+              <textarea class="output-area" readonly rows="20"><?php echo htmlspecialchars($outputResult); ?></textarea>
             </div>
+
+            <div class="options-card">
+              <h2>Parameters</h2>
+
+              <label>Target distance:</label>
+              <input type="text" name="targetDistance" placeholder="0.5E-13" />
+
+              <label>Min probability:</label>
+              <input type="text" name="minProbForState" placeholder="0" />
+
+              <label>Target states:</label>
+              <input type="text" name="targetNumberOfStates" placeholder="N²" />
+
+              <label>Precision:</label>
+              <select name="precision">
+                <option value="3" <?php echo $precision == "3" ? "selected" : ""; ?>>3</option>
+                <option value="6" <?php echo $precision == "6" ? "selected" : ""; ?>>6</option>
+                <option value="9" <?php echo $precision == "9" ? "selected" : ""; ?>>9</option>
+                <option value="12" <?php echo $precision == "12" ? "selected" : ""; ?>>12</option>
+                <option value="15" <?php echo $precision == "15" ? "selected" : ""; ?>>15</option>
+              </select>
+
+              <label>Accuracy boost:</label>
+              <div class="radio-group">
+                <label><input type="radio" name="accuracyBoost" value="1" <?php echo $accuracyBoost == "1" ? "checked" : ""; ?> /> On</label>
+                <label><input type="radio" name="accuracyBoost" value="0" <?php echo $accuracyBoost == "0" ? "checked" : ""; ?> /> Off</label>
+              </div>
+
+              <div class="action-buttons">
+                <button type="submit" name="separate" value="1">Separate</button>
+<?php if ($isExample) : ?>
+                <span class="tooltip-wrapper" title="Go to Home to input your own matrix">
+                  <button type="button" class="secondary-btn" disabled>Randomize</button>
+                </span>
+<?php else : ?>
+                <button type="submit" name="randomize" value="1" class="secondary-btn">Randomize</button>
+<?php endif; ?>
+              </div>
+            </div>
+          </div>
         </form>
-    </div>
-    <div id="footer">
-        <address>Developed at the Technion - Israel Institute of Technology, Haifa, Israel</address>
-    </div>
-</body>
-</html>
+      </div>
+    </main>
+
+<?php include '_footer.php'; ?>
