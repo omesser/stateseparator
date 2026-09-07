@@ -7,7 +7,7 @@
 # =============================================================================
 # Stage 1: Build the C++ executables
 # =============================================================================
-FROM debian:bullseye-slim AS builder
+FROM debian:bookworm-slim AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -29,7 +29,7 @@ RUN make clean && make all SERVER=1
 # =============================================================================
 # Stage 2: Runtime environment with Apache + PHP
 # =============================================================================
-FROM php:8.2-apache
+FROM php:8.2-apache-bookworm
 
 # Install runtime dependencies (OpenMP runtime library)
 RUN apt-get update && apt-get install -y --no-install-recommends \
