@@ -1,279 +1,193 @@
-# Quantum State separator  
+# Quantum State Separator
 
-## Overview
-**The state separator implements a probabilistic numerical algorithm that checks whether a given multi-Qudits
-state is separable or entangled.**
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL%203.0-blue.svg)](LICENSE)
 
-The algorithm is based on *"Geometrical aspects of entanglement"*, Physical review A 74, 012313 (2006),
-by Jon Magne Leinaas, Jan Myrheim and Eirik Ovrum.
+**Check whether a multi-qudit density matrix is separable or entangled** — and, when it is separable (or close), see a nearest separable approximation and its decomposition into product states.
 
-The state separator also performs a *Peres-Horodecki* partial-transpose test on the matrix. The *Peres-Horodecki* test is
-always a necessary condition for separability, and is also sufficient for `2 X 2` and `2 X 3` sized systems.
+The tool runs a [Peres–Horodecki](https://en.wikipedia.org/wiki/Peres%E2%80%93Horodecki_criterion) (PPT) partial-transpose test, then a probabilistic numerical search for the nearest separable state based on *Geometrical aspects of entanglement*, Physical Review A **74**, 012313 (2006), by Jon Magne Leinaas, Jan Myrheim, and Eirik Ovrum.
 
-The state separator will find the nearest separable state and its decomposition to pure product states and give
-the	distance from the target matrix.
+## Contents
 
-Simply copy the density matrix to be tested to the main program window,
-enter the Qudits (particles) number and dimension (i.e. `2 2` for 2-Qubits) and hit the `separate` button on the right.
+- [Try it](#try-it)
+- [Quick start](#quick-start)
+- [Optional parameters](#optional-parameters)
+- [Main algorithm](#main-algorithm)
+- [Accuracy](#accuracy)
+- [Time complexity](#time-complexity)
+- [Want to help?](#want-to-help)
+- [History and credits](#history-and-credits)
+- [License](#license)
+- [Appendix: Matrix-element format](#appendix-matrix-element-format)
 
-If the input state fails the *Peres-Horodecki* test - it will be declared `entangled (Peres Test)`.
-Otherwise:
-- If the target distance from the given matrix was reached (default `0.5E-13`) - it will be declared `separable`.
-- else, if the distance is less than `0.0005` - it will be declared `might be entangled`.
-- else - it is declared `most likely entangled`.
+## Try it
 
-In any case, the full details will be displayed right below the result message.
+[Open the State Separator](https://stateseparator.onrender.com)
 
-For more details about the algorithm used, read [main algorithm](#main-algorithm), or the appropriate article.
+Paste a density matrix, enter the qudit dimensions, hit **Separate**.
 
-We hope you find this tool useful. For bugs and issues please contact us (see contact page).
+## Quick start
 
+1. Paste the density matrix into the main window (whitespace-separated elements; newline = new row).
+2. Enter qudit number and dimensions, e.g. `2 2` for two qubits, or `2 3` for qubit+qutrit.
+   The product of the dimensions must equal the matrix order.
+3. Optionally tweak target distance, minimum weight, target number of states, output precision, or accuracy boost.
+4. Click **Separate**.
 
-## Usage
-### Qudits number and dimension window
+### How to read the result
 
-    Format: [Integer] [white_space] [Integer][white_space] and so on....
+| Verdict | Meaning |
+| --- | --- |
+| `entangled (Peres Test)` | Failed the Peres–Horodecki PPT test (necessary for separability; also sufficient for `2×2` and `2×3`). |
+| `separable` | Distance to the nearest separable approximant reached the target (default `0.5E-13`). |
+| `might be entangled` | Distance &lt; `0.0005` but above the target. |
+| `most likely entangled` | Larger residual distance. |
 
-Example - 2-Qubit: `"2 2"` (Two particles, of size 2 each)
+Full numeric details (nearest separable state, product-state weights, distance) appear below the verdict. You can hit **Separate** again without clearing the window; previous output is ignored as input.
 
-Example - Qubit+Qutrit: `"2 3"` (Two particles, of sizes 2 and 3 appropriately)
+Matrix elements may look like `+2.3-i0.2`, `5i`, `-0.2i`, `0.6i-3.1`. See [Appendix: Matrix-element format](#appendix-matrix-element-format) for the full grammar.
 
-Note: The product of the Qudits' dimension must be the same as the dimension/order of the input matrix.
+The matrix is checked (to about 3 decimal digits) for Hermitian, positive semidefinite, and unit trace. Warnings do not stop the run, but they affect how meaningful the output is — the algorithm only reaches Hermitian, positive-semidefinite approximants.
 
-### <a name="main-window">Main window - matrix & output
+## Optional parameters
 
-*Paste your matrix here!*
-The system does basic input check, (#rows=#cols, only numerical data input, etc. ).
-The matrix elements should be delimited by one or more white-spaces, and newline indicates a new row.
-The system ignores its own results after the input matrix, so you can hit "separate" multiple
-times without cleaning the input window, and the system will append the new results to the bottom of the main window.
+| Parameter | Default | Role |
+| --- | --- | --- |
+| Target distance | `0.5E-13` | Treat input and approximant as equal below this distance. |
+| Minimum weight per state | `0` | Drop pure product states below this mixing weight. |
+| Target number of states | `N²` | Cap on product states in the mixed-state approximant. |
+| Output precision | `3` | Display digits only (`3` / `6` / `9` / `12` / `15`) — not calculation accuracy. |
+| Accuracy boost | off | Heavier heuristics (`M = N³`, `R = 1000` vs `M = N²+N`, `R = 100`). See [Time complexity](#time-complexity). |
 
-
-Matrix-element format examples: `+2.3-i0.2, 3, 5i, -0.2i, 0.6i-3.1, i+0.1`
-
-For exact formatting options see [appendix](#appendix-matrix-element-format)
-
-#### Additional restrictions
-The Matrix given is checked to be Hermitian, semi-definite positive,
-and to have unit-trace.	If the conditions aren't met (to 3rd decimal digit only), a warning message will be displayed.
-Please note this will affect the relevance of the output, as the algorithm can only reach a hermitian, semi-definite-positive!
-
-### Optional parameters
-#### Target distance
-
-Sets the minimal distance between the input matrix and its best separable approximant,
-such that they are considered equal.
-This is set by default to `0.5E-13`, and can be overridden with any positive value.
-
-#### Minimum weight per state
-
-The algorithm weeds out from the mixed-states approximation, pure-states with a coefficient
-below a minimum threshold. This sets this threshold, and it should be a positive weight
-The default value is set to `0`.
-
-#### Target number of states
-
-The target number of product states that comprise the mixed-state-approximation. On default
-this is set to `N^2`, but can be overridden to a manual value to the user's choice.
-
-#### Output precision
-
-Determines how many decimal digits are going to be displayed in the output.
-
-Chose between `3`,`6`,`9`,`12`,`15`. Default is `3`.
-
-Note: This only sets output-display accuracy, and does NOT affect the floating point calculation accuracy of the system.
-
-#### Accuracy boost mode
-
-A toggle that determines the values of 2 heuristics in the algorithm.
-
-Without the accuracy boost (default):
-
-    M = N^2 + N
-    R = 100
-
-And in choosing the accuracy boost mode will set:
-
-    M = N^3
-    R = 1000
-
-Note: for further details read about the algorithm time complexity in [time complexity](#time-complexity)
+Build, Docker, and architecture notes for contributors live in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Main algorithm
 
-The algorithm implemented is an iterative search for a close approximation to the input matrix WITHIN
-the separable matrices subspace.
+The algorithm is an iterative search for a close approximation to the input matrix **within** the separable matrices subspace.
 
-Starting from the maximally mixed state, the system iteratively
-adds pure states to the mixed-state approximation, where each pure state is generated to
-maximize the projection of the distance vector between the current best-approximation matrix,
-and the original input matrix, on the separable matrices subspace.
+Starting from the maximally mixed state, the system iteratively adds pure states to the mixed-state approximation. Each pure state is generated to maximize the projection of the distance vector between the current best-approximation matrix and the original input matrix onto the separable matrices subspace.
 
+The main iteration repeats until either a [target distance](#optional-parameters) to the original matrix is reached, or a maximum number of iterations is hit. The heuristic for the maximum number of main iterations is `(target-number-of-states)²` (see target number of states above).
 
-The main iteration repeats until either a target distance to original matrix is reached
-(see [target distance](#target-distance) or until a number of iterations is reached. The heuristic for the maximum
-number of main iterations is `(target-number-of-states)^2` (see [target number of states](#target-number-of-states)).
+Minimization of the distance between the current best approximation and the original implements a quadratic-programming approach. The equation system is solved efficiently using Eigen's LDLT Cholesky decomposition.
 
-Minimization of the distance between the current best approximation mixed-state matrix, and the original, is
-reached implementing a quadratic-programming optimization approach. The equation system is solved efficiently using
-Eigen's LDLT Cholesky's decomposition.
+The pure-state collection from which the approximation is constructed is optimized by discarding states with probability below the **Minimum weight per state** threshold.
 
-The pure states collection from which the approximation is constructed is optimized by discarding
-states with probability below the "Minimum probability per state" threshold
-(see [minimum weight per state](#minimum-weight-per-state)).
+In each main iteration, constructing the best candidate pure state to mix in is itself an iterative numerical process. The distance between the original matrix and the last approximation is used to generate a tensor-product pure state via a compound adjoint eigenproblem (for each particle). That process refines the pure state until a maximal eigenvalue is reached consistently for all particles, or a heuristic cap is hit (`500` iterations currently).
 
-In each main iteration, the construction of the best candidate pure state to mix-in to our
-approximation matrix is also an iterative numerical process on it's own.
-
-
-Here we use distance between the original matrix and our last approximation to generate a tensor-product pure-state,
-using a compound adjoint Eigen problem (for each particle).
-
-This process refines the pure state until a maximal Eigen value is reached consistently for all particles,
-or a heuristic is reached (`500` iterations currently).
-
-For more background and details , see the original paper: *"Geometrical aspects of entanglement"*,
-Physical review A 74, 012313 (2006).
-by Jon Magne Leinaas, Jan Myrheim and Eirik Ovrum.
-
+For background and details, see the original paper: *Geometrical aspects of entanglement*, Physical Review A **74**, 012313 (2006), by Jon Magne Leinaas, Jan Myrheim, and Eirik Ovrum.
 
 ## Accuracy
-#### Input accuracy
 
-The input accuracy is very loosely restricted. The floating point calculation of a the data representation
-is limited to 14 significant digits, so entering more than this	is redundant. It is redundant to enter more digits than
-the output format (see [output accuracy](#output-accuracy)), or than the accuracy of the algorithm itself -
-6-7 significant digits (see [algorithm accuracy](#algorithmcalculation-accuracy)).
+### Input accuracy
 
-#### Output accuracy
+Input accuracy is only loosely restricted. Floating-point representation of the data is limited to about 14 significant digits, so entering more than that is redundant. It is also redundant to enter more digits than the chosen [output precision](#optional-parameters), or than the algorithm itself typically delivers (about 6–7 significant digits; see below).
 
-This refers to the manual setting of the display format of the output. See [output percision](#output-percision).
-Setting this will **NOT** affect the calculation time or accuracy
-(see [algorithm accuracy](#algorithmcalculation-accuracy)), but simply **the number of decimal digits displayed**.
+### Output accuracy
 
-#### Algorithm/Calculation accuracy
+Output precision only controls how many decimal digits are **displayed**. It does **not** change calculation time or numerical accuracy.
 
-The numerical nature of the algorithm makes defining it's accuracy a not-well-defined problem.
-The representation is only limited to the floating point error (`E-19`) but looking for pure states and tracing out
-the ideal pure states in each step is a numerical approximation. The choice of heuristics was made such that a good
-enough accuracy was reached, while not allowing the algorithm to take more than a few seconds on typically sized
-input matrices.
+### Algorithm / calculation accuracy
 
+Because the method is numerical, “accuracy” is not a single well-defined number. Representation is limited by floating-point error (on the order of `E-19`), but searching for pure states and tracing out ideal pure states at each step is an approximation. Heuristics were chosen so that accuracy is good enough while typical-sized inputs finish in a few seconds.
 
-As a measure of accuracy, we consider differentiating between separable and non-separable Werner states,
-parametrized by `q`:
+As a concrete check, consider Werner states parametrized by `q`:
 
-    W = q*I + (1-q)*B
+```text
+W = q*I + (1-q)*B
+```
 
-Where `I` is the normalized `4x4` mixed state, and `B` is any of the Bell states.
-For q &lt 1/3 the state is separable, while for q &gt, entangled.
-In it's current optimization settings, using the [*accuracy boost mode*](#accuracy-boost-mode), the system will find a
-separable approximation for `W`, within less than `0.5E-13`, for `q=0.3332` (or less, of course). This means that for
-this marginal type of matrix, we achieve accuracy of `0.5E-4` in the parameter `q`.
+where `I` is the normalized `4×4` maximally mixed state and `B` is any Bell state. For `q < 1/3` the state is separable; for `q > 1/3` it is entangled.
 
+With [accuracy boost mode](#optional-parameters) on, the system finds a separable approximation for `W` within less than `0.5E-13` for `q = 0.3332` (and smaller `q`). For this marginal family, that corresponds to about `0.5E-4` accuracy in the parameter `q`.
 
 ## Time complexity
 
-Worst case time complexity stands at:
+Worst-case time complexity is:
 
-    O(R * n * M * N^3)
+```text
+O(R * n * M * N³)
+```
 
-Where:
+where:
 
-    R = traceOut refinement steps
-    M = maximum main iteration steps defined. see accuracy boost sec 2.3.5.
-    N = order of the input matrix
-    n = number of particles
+| Symbol | Meaning |
+| --- | --- |
+| `R` | Trace-out refinement steps |
+| `M` | Maximum main-iteration steps (see accuracy boost) |
+| `N` | Order of the input matrix |
+| `n` | Number of particles |
 
-Details:
+### Details
 
+The initial Peres test applies a single-particle partial transpose per particle. That phase is `O(n * N²)` and is not the limiting cost.
 
-The initial Peres test, test's a single particle partial transpose per each particle.
-Total time complexity for this phase stands at `O(n * N^2)` and is not the limiting value.
+The main algorithm uses heuristics to bound runtime. The main iteration count (how many times we search for an extra pure state to mix in) is limited by `M`, which depends on whether [accuracy boost mode](#optional-parameters) is on, unless another stopping condition is reached first.
 
-The main algorithm uses several heuristics to limit it's computation time.
-First, the main iteration (how many time do we search for an extra pure-state to mix-in
-with our approximation) is limited by M depending on whether [accuracy boost mode](#accuracy-boost-mode)
-is chosen, if no other breaking condition is reached.
+**Without** accuracy boost (default):
 
-Each such iteration requires that we build a new pure-state, which is done in several
-iterations, each refining the projection vector tensor products.
-The number of iterations here is limited and maximum value is set by the [accuracy boost mode](#accuracy-boost-mode).
-In which we iterate over the particles (n), projecting the traced out parts over the particle's subspace `O(N^2)`,
-and solving to get the maximal Eigen-value `O(N^3)`.
-After the new pure-state is built we mix it in to our approximation and solve another
-Eigen problem (QP problem) to find the correct coefficients for our different pure-states
-in `O(N^3)`.
-finally we perform a rudimentary selection sort to provide the users with the states
-sorted in a descending order according to their respective probability.
-This takes an additional `O(targetNumStates * log(targetNumStates))` which is
-defaulted to `O(N^3)` unless determined otherwise by user input.
-So Total Time complexity stands at:
+```text
+M = N² + N
+R = 100
+```
 
-    O( (R * n * [N^2 + N^3 + N^3])  + N^3 ) &lt= O(R * n * N^3)
+**With** accuracy boost:
 
+```text
+M = N³
+R = 1000
+```
 
-## Version and release date
+Each main iteration builds a new pure state in several refinement steps over particles (`n`), projecting traced-out parts over each particle’s subspace `O(N²)` and solving for the maximal eigenvalue `O(N³)`. After the new pure state is mixed in, another eigenproblem (QP) finds mixing coefficients in `O(N³)`. A selection sort then orders states by descending probability: `O(targetNumStates * log(targetNumStates))`, which defaults to `O(N³)` unless the user overrides the target count.
 
-The **State-separator** started in 2012 as an under-graduate student project at the [Physics department of the
-Technion - Israel institute of technology, Haifa, Israel](https://phys.technion.ac.il/en/),
-by [Naftaly Shalev](https://www.linkedin.com/in/naftaly-shalev-36b53711a) and completed in 2014
-by [Oded Messer](https://github.com/omesser) under the guidance of
-[J. Avron](https://phsites.technion.ac.il/avron/).  
+So total time complexity is bounded by:
 
-It provide students, researchers and  quantum information enthusiasts an easy to use tool to
-test for separability of quantum systems.
+```text
+O( (R * n * [N² + N³ + N³]) + N³ ) ≤ O(R * n * N³)
+```
 
-## Licensing and disclaimer
+## Want to help?
 
-The system core logic is written in c++ code using Eigen free-library, and simple html and php layer for web access.
+Issues, fixes, and docs improvements are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and open a GitHub issue or pull request.
 
-The State Separator is distributed as OSS under [the GPL-3.0 License](LICENSE)
+## History and credits
 
-**You may use this program and distribute it freely.**
+Started in 2012 as an undergraduate project at the [Physics Department, Technion – Israel Institute of Technology](https://phys.technion.ac.il/en/), by [Naftaly Shalev](https://www.linkedin.com/in/naftaly-shalev-36b53711a), and completed in 2014 by [Oded Messer](https://github.com/omesser) under the guidance of [J. Avron](https://phsites.technion.ac.il/avron/).
 
+Thanks to [Dr. Oded Kenneth](https://phys.technion.ac.il/en/people/person/295) for mathematical advice at several critical stages.
 
-The state-separator program contains only original code, and code from the Eigen library. Eigen is a free
-software, distributed under the LGPL3+ license (and MPL2 in later versions).
-[Eigen license page](http://eigen.tuxfamily.org/index.php?title=Main_Page#License)
+Bug reports and feedback: [GitHub Issues](https://github.com/omesser/stateseparator/issues).
 
-Feedback and bug reports are welcome [contact page](http://phweb.technion.ac.il/~stateseparator/contact.html)
+## License
 
-Neither the Technion nor the authors are responsible to any outcome
-the usage of the system may lead to.
+Distributed under the [GPL-3.0 License](LICENSE). Core logic is C++ (Eigen) with a small HTML/PHP web layer.
 
-## Credit and Thanks
+Eigen is free software (LGPL3+ / MPL2 in later versions); see the [Eigen license page](https://eigen.tuxfamily.org/index.php?title=Main_Page#License).
 
-The system was conceived by [J. Avron](https://phsites.technion.ac.il/avron/), and the first version of the
-code was developed and written by [Naftaly Shalev](https://www.linkedin.com/in/naftaly-shalev-36b53711a).
-2nd code iteration, algorithm improvements, testing and write-up of documentation and menus was
-done by [Oded Messer](https://github.com/omesser).
+Neither the Technion nor the authors are responsible for outcomes from using this program.
 
-We thank [Dr. Oded Kenneth](https://phys.technion.ac.il/en/people/person/295) for his wise mathematical
-council in several critical stages of the project.
+*Developed at the Technion – Israel Institute of Technology, Haifa, Israel*
 
 ## Appendix: Matrix-element format
 
-The matrix elements are expected in the following formats:
+Matrix elements are expected in the following forms:
 
-    [+/-][real_part][+/-][i][img_part]   		Example: +2.3-i0.2
-    [+/-][real_part][+/-][img_part][i]   		Example: -2.3-0.2i
-    [real_part][+/-][i][img_part]   		Example:  2.3-i0.2
-    [real_part][+/-][img_part][i]   	 	Example:  2.3-0.2i
-    [+/-][i][img_part][+/-][real_part]	        Example: +i2.3-0.2
-    [+/-][img_part][i][+/-][real_part] 	        Example: -2.3i-0.2
-    [i][img_part][+/-][real_part]  		 	Example: i2.3-0.2
-    [img_part][i][+/-][real_part]   		Example: +2.3i+0.2
-    [+/-][real_part] 				Example: -2.3
-    [real_part]   					Example:  2.3
-    [+/-][img_part][i]   				Example: +2.3i
-    [+/-][i][img_part]   				Example: -i2.3
-    [img_part][i]   		 		Example:  2.3i
-    [i][img_part]  	 				Example: i2.3
+```text
+[+/-][real_part][+/-][i][img_part]          Example: +2.3-i0.2
+[+/-][real_part][+/-][img_part][i]          Example: -2.3-0.2i
+[real_part][+/-][i][img_part]               Example:  2.3-i0.2
+[real_part][+/-][img_part][i]               Example:  2.3-0.2i
+[+/-][i][img_part][+/-][real_part]          Example: +i2.3-0.2
+[+/-][img_part][i][+/-][real_part]          Example: -2.3i-0.2
+[i][img_part][+/-][real_part]               Example: i2.3-0.2
+[img_part][i][+/-][real_part]               Example: +2.3i+0.2
+[+/-][real_part]                            Example: -2.3
+[real_part]                                 Example:  2.3
+[+/-][img_part][i]                          Example: +2.3i
+[+/-][i][img_part]                          Example: -i2.3
+[img_part][i]                               Example:  2.3i
+[i][img_part]                               Example: i2.3
+```
 
+- Note: `i` without a number is interpreted as `1*i`, e.g. `3+i` = `3+1i`.
 
-- Note: `i` without number will be interpreted as: `1*i` i.e. `3+i = 3+1i`
-
-
-*Developed at the the Technion - Israel Institute of Technology, Haifa, Israel*
+Elements in a row are separated by one or more whitespace characters; a newline starts a new row.
