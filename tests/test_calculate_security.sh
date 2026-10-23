@@ -6,6 +6,7 @@ set -u
 
 IMAGE="${1:-stateseparator}"
 CONTAINER=""
+BODY_FILE=$(mktemp)
 FAILED=0
 
 RED='\033[0;31m'
@@ -13,6 +14,7 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 
 cleanup() {
+  rm -f "$BODY_FILE"
   [[ -n "$CONTAINER" ]] && docker rm -f "$CONTAINER" > /dev/null 2>&1
 }
 trap cleanup EXIT
@@ -49,13 +51,20 @@ valid_value() {
 }
 
 # post <action> <field=value>... ; prints "<http code>" then the body to $BODY_FILE
-BODY_FILE=$(mktemp)
 post() {
   local action="$1"
   shift
   local args=(--data-urlencode "${action}=1")
   for kv in "$@"; do args+=(--data-urlencode "$kv"); done
   curl -s -o "$BODY_FILE" -w "%{http_code}" -X POST "$URL" "${args[@]}"
+}
+
+# textarea <attr>: prints the unescaped text of the <textarea> in $BODY_FILE whose tag has <attr>.
+textarea() {
+  python3 -c '
+import html, re, sys
+m = re.search(r"<textarea " + re.escape(sys.argv[1]) + r"[^>]*>(.*?)</textarea>", open(sys.argv[2]).read(), re.S)
+print(html.unescape(m.group(1)) if m else "<no textarea>")' "$1" "$BODY_FILE"
 }
 
 marker_exists() {
@@ -103,10 +112,7 @@ done
 direct=$(docker exec -w /var/www/html "$CONTAINER" ./NSeparator "2 2" "$MIXED" "" "" "" "3" "0" | sed 's/[[:space:]]*$//')
 code=$(post separate "particleSizes=2 2" "matrix=$MIXED" "targetDistance=" "minProbForState=" \
   "targetNumberOfStates=" "precision=3" "accuracyBoost=0")
-web=$(python3 -c '
-import html, re, sys
-m = re.search(r"<textarea class=\"output-area\"[^>]*>(.*?)</textarea>", open(sys.argv[1]).read(), re.S)
-print(html.unescape(m.group(1)) if m else "<no output area>")' "$BODY_FILE")
+web=$(textarea 'class="output-area"')
 if [[ "$code" == "200" && "$web" == "$direct" && "$web" == *"The system is separable"* ]]; then
   pass "separate: valid input output matches direct NSeparator run"
 else
@@ -125,11 +131,8 @@ else
 fi
 
 code=$(post randomize "particleSizes=2 2" "precision=3")
-rows=$(python3 -c '
-import html, re, sys
-m = re.search(r"<textarea name=\"matrix\"[^>]*>(.*?)</textarea>", open(sys.argv[1]).read(), re.S)
-rows = [r.split() for r in html.unescape(m.group(1)).strip().splitlines()] if m else []
-print(len(rows) if rows and all(len(r) == 4 for r in rows) else 0)' "$BODY_FILE")
+# Rows of the matrix textarea, or 0 unless every row has 4 entries.
+rows=$(textarea 'name="matrix"' | awk 'NF { n++; if (NF != 4) bad = 1 } END { print (bad || !n) ? 0 : n }')
 if [[ "$code" == "200" && "$rows" == "4" ]] && grep -q "Random matrix generated" "$BODY_FILE"; then
   pass "randomize: returns a 4x4 matrix"
 else
@@ -158,7 +161,6 @@ else
   fail "PHP >= 8.2.35 (got $version)"
 fi
 
-rm -f "$BODY_FILE"
 echo ""
 if [[ "$FAILED" -eq 0 ]]; then
   echo -e "${GREEN}All security tests passed${NC}"
