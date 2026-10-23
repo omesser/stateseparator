@@ -60,6 +60,8 @@ jobs:
 
       - run: ./tests/test_docker.sh stateseparator
 
+      - run: ./tests/test_calculate_security.sh stateseparator
+
       - run: |
           docker run --rm -v ${{ github.workspace }}/tests:/tests stateseparator \
             /tests/test_separator.sh /var/www/html/NSeparator /var/www/html/NRandomizer
