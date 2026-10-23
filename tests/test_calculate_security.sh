@@ -29,7 +29,7 @@ URL="http://127.0.0.1:${PORT}/calculate.php"
 
 # Fail fast (about 3 s) if Apache never answers.
 if ! curl -s -o /dev/null --retry 30 --retry-delay 0 --retry-all-errors \
-    --retry-max-time 3 --max-time 3 "$URL"; then
+  --retry-max-time 3 --max-time 3 "$URL"; then
   echo -e "${RED}FAILED${NC} Apache did not answer at $URL within 3 s"
   exit 1
 fi
