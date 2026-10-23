@@ -29,6 +29,7 @@
     - [NMixedState / NPureState](#nmixedstate--npurestate)
   - [Testing](#testing)
     - [Docker Integration Tests (Recommended)](#docker-integration-tests-recommended)
+    - [Security Tests](#security-tests)
     - [Binary Unit Tests](#binary-unit-tests)
   - [Troubleshooting](#troubleshooting)
     - [Build Errors](#build-errors)
@@ -119,7 +120,7 @@ stateseparator/
 │   (User Input)  │                      │                 │
 └─────────────────┘                      └────────┬────────┘
                                                   │
-                                         exec() call with args
+                                     proc_open() with an argv array
                                                   │
                                                   ▼
                                          ┌─────────────────┐
@@ -178,7 +179,7 @@ brew install gcc
 ### For Running the Web Interface
 
 - **Apache** or **Nginx** web server
-- **PHP** (5.x or 7.x) with `exec()` enabled
+- **PHP** 7.4 or newer with `proc_open()` enabled (the Docker image ships 8.2.35)
 - The compiled binaries (`NSeparator`, `NRandomizer`) in `public_html/`
 
 ---
@@ -324,6 +325,19 @@ This tests:
 - PHP processing
 - Form submission (separable and entangled states)
 
+### Security Tests
+
+Run the `calculate.php` security tests against the same image:
+
+```bash
+./tests/test_calculate_security.sh stateseparator
+```
+
+This tests:
+- Shell injection payloads in every form field are rejected with HTTP 400 and never run
+- Valid input gives the same output as running `NSeparator` directly
+- PHP hardening: `expose_php=Off`, `session.upload_progress.enabled=0`, PHP 8.2.35 or newer
+
 ### Binary Unit Tests
 
 Run standalone binary tests inside Docker:
@@ -365,7 +379,7 @@ sudo apt-get install libgomp1
 chmod +x public_html/NSeparator public_html/NRandomizer
 ```
 
-**PHP exec() disabled**: Check PHP configuration
+**PHP proc_open() disabled**: Check PHP configuration
 ```bash
 php -i | grep disable_functions
 ```
@@ -404,7 +418,7 @@ pre-commit run --all-files --show-diff-on-failure
 2. Create a feature branch
 3. Make your changes
 4. Run linters: `pre-commit run --all-files --show-diff-on-failure`
-5. Run tests: `./tests/test_docker.sh stateseparator`
+5. Run tests: `./tests/test_docker.sh stateseparator` and `./tests/test_calculate_security.sh stateseparator`
 6. Submit a pull request
 
 ---
