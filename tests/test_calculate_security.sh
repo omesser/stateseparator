@@ -27,10 +27,12 @@ CONTAINER=$(docker run -d -p 127.0.0.1::80 "$IMAGE")
 PORT=$(docker port "$CONTAINER" 80/tcp | head -1 | sed 's/.*://')
 URL="http://127.0.0.1:${PORT}/calculate.php"
 
-for _ in $(seq 1 100); do
-  curl -s -o /dev/null "$URL" && break
-  sleep 0.1
-done
+# Fail fast (about 3 s) if Apache never answers.
+if ! curl -s -o /dev/null --retry 30 --retry-delay 0 --retry-all-errors \
+    --retry-max-time 3 --max-time 3 "$URL"; then
+  echo -e "${RED}FAILED${NC} Apache did not answer at $URL within 3 s"
+  exit 1
+fi
 
 MIXED=$'0.25 0 0 0\n0 0.25 0 0\n0 0 0.25 0\n0 0 0 0.25'
 FIELDS=(particleSizes matrix targetDistance minProbForState targetNumberOfStates precision accuracyBoost)
