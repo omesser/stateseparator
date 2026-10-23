@@ -33,11 +33,11 @@ if ($separate || $randomize) {
 $matrixInput = "";
 $outputResult = "";
 
-const INT_LIST = '/^\s*\d+(\s+\d+)*\s*$/';
-const INT = '/^\s*\d+\s*$/';
-const INT_OPTIONAL = '/^\s*(\d+)?\s*$/';
-const DECIMAL_OPTIONAL = '/^\s*([+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?)?\s*$/';
-const MATRIX_CHARS = '/^[0-9.eE+\-ij \t\r\n]*$/';
+const INPUT_INT_LIST = '/^\s*\d+(\s+\d+)*\s*$/';
+const INPUT_INT = '/^\s*\d+\s*$/';
+const INPUT_INT_OPTIONAL = '/^\s*(\d+)?\s*$/';
+const INPUT_DECIMAL_OPTIONAL = '/^\s*([+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?)?\s*$/';
+const INPUT_MATRIX_CHARS = '/^[0-9.eE+\-ij \t\r\n]*$/';
 
 function rejectInput(string $message): void
 {
@@ -55,6 +55,12 @@ function validateInputs(array $rules): void
             rejectInput("$label has characters or a format that is not allowed.");
         }
     }
+}
+
+// Builds argv from the same ordered field list that validateInputs() checked.
+function fieldArgv(string $binary, array $fields): array
+{
+    return array_merge([$binary], array_column(array_values($fields), 0));
 }
 
 // Runs a binary from this directory with an argv array, so no shell parses the input.
@@ -91,27 +97,29 @@ if ($separate) {
         }
     }
     $matrixInput = trim($cleanMatrix);
-    validateInputs([
-        'System (particle sizes)' => [$particleSizes, INT_LIST],
-        'Matrix' => [$matrixInput, MATRIX_CHARS],
-        'Target distance' => [$targetDistance, DECIMAL_OPTIONAL],
-        'Min probability' => [$minProbForState, DECIMAL_OPTIONAL],
-        'Target states' => [$targetNumberOfStates, INT_OPTIONAL],
-        'Precision' => [$precision, INT],
-        'Accuracy boost' => [$accuracyBoost, INT],
-    ]);
+    $fields = [
+        'System (particle sizes)' => [$particleSizes, INPUT_INT_LIST],
+        'Matrix' => [$matrixInput, INPUT_MATRIX_CHARS],
+        'Target distance' => [$targetDistance, INPUT_DECIMAL_OPTIONAL],
+        'Min probability' => [$minProbForState, INPUT_DECIMAL_OPTIONAL],
+        'Target states' => [$targetNumberOfStates, INPUT_INT_OPTIONAL],
+        'Precision' => [$precision, INPUT_INT],
+        'Accuracy boost' => [$accuracyBoost, INPUT_INT],
+    ];
+    validateInputs($fields);
     $matrixRows = substr_count($matrixInput, "\n") + 1;
     error_log("[NSeparator] Executing: particleSizes=$particleSizes, matrixRows=$matrixRows, precision=$precision, accuracyBoost=$accuracyBoost");
-    $separatorOutput = runBinary(['./NSeparator', $particleSizes, $matrixInput, $targetDistance, $minProbForState, $targetNumberOfStates, $precision, $accuracyBoost], $returnValue);
+    $separatorOutput = runBinary(fieldArgv('./NSeparator', $fields), $returnValue);
     error_log("[NSeparator] Completed: exitCode=$returnValue");
     $outputResult = implode("\n", $separatorOutput);
 } elseif ($randomize) {
-    validateInputs([
-        'System (particle sizes)' => [$particleSizes, INT_LIST],
-        'Precision' => [$precision, INT],
-    ]);
+    $fields = [
+        'System (particle sizes)' => [$particleSizes, INPUT_INT_LIST],
+        'Precision' => [$precision, INPUT_INT],
+    ];
+    validateInputs($fields);
     error_log("[NRandomizer] Executing: particleSizes=$particleSizes, precision=$precision");
-    $randomizerOutput = runBinary(['./NRandomizer', $particleSizes, $precision], $returnValue);
+    $randomizerOutput = runBinary(fieldArgv('./NRandomizer', $fields), $returnValue);
     error_log("[NRandomizer] Completed: exitCode=$returnValue");
     $matrixInput = implode("\n", $randomizerOutput);
     $outputResult = "Random matrix generated. Click 'Separate' to analyze.";
