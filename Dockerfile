@@ -29,12 +29,16 @@ RUN make clean && make all SERVER=1
 # =============================================================================
 # Stage 2: Runtime environment with Apache + PHP
 # =============================================================================
-FROM php:8.2-apache-bookworm
+# 8.2.35 fixes CVE-2026-109618/109619. Pinned by digest of the multi-arch index (as of 2026-10-23).
+FROM php:8.2.35-apache-bookworm@sha256:5714c8607608e50d880a5f222fab556edecd4a11b9c50c81fce1c7932c1cf604
 
 # Install runtime dependencies (OpenMP runtime library)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
     && rm -rf /var/lib/apt/lists/*
+
+# PHP hardening: expose_php=Off, session.upload_progress.enabled=0
+COPY docker/php.ini $PHP_INI_DIR/conf.d/zz-stateseparator.ini
 
 # Copy the compiled binaries from builder stage
 COPY --from=builder /app/build/bin/NSeparator /var/www/html/NSeparator

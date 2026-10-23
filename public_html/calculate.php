@@ -33,8 +33,61 @@ if ($separate || $randomize) {
 $matrixInput = "";
 $outputResult = "";
 
+const INPUT_INT_LIST = '/^\s*\d+(\s+\d+)*\s*$/';
+const INPUT_INT = '/^\s*\d+\s*$/';
+const INPUT_INT_OPTIONAL = '/^\s*(\d+)?\s*$/';
+const INPUT_DECIMAL_OPTIONAL = '/^\s*([+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?)?\s*$/';
+const INPUT_MATRIX_CHARS = '/^[0-9.eE+\-ij \t\r\n]*$/';
+
+function rejectInput(string $message): void
+{
+    http_response_code(400);
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "Invalid input: $message\n";
+    exit;
+}
+
+// $rules maps label => [value, regex]; the first mismatch ends the request with HTTP 400.
+function validateInputs(array $rules): void
+{
+    foreach ($rules as $label => [$value, $pattern]) {
+        if (!is_string($value) || !preg_match($pattern, $value)) {
+            rejectInput("$label has characters or a format that is not allowed.");
+        }
+    }
+}
+
+// Builds argv from the same ordered field list that validateInputs() checked.
+function fieldArgv(string $binary, array $fields): array
+{
+    return array_merge([$binary], array_column(array_values($fields), 0));
+}
+
+// Runs a binary from this directory with an argv array, so no shell parses the input.
+// Returns stdout lines with trailing whitespace stripped, the way exec() did.
+function runBinary(array $argv, ?int &$exitCode): array
+{
+    $stdout = '';
+    $proc = proc_open($argv, [1 => ['pipe', 'w'], 2 => fopen('php://stderr', 'w')], $pipes, __DIR__);
+    if (is_resource($proc)) {
+        $stdout = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+        $exitCode = proc_close($proc);
+    } else {
+        $exitCode = -1;
+    }
+    $lines = explode("\n", $stdout);
+    if (end($lines) === '') {
+        array_pop($lines);
+    }
+    return array_map(fn($line) => rtrim($line, " \t\n\r\v\f"), $lines);
+}
+
 if ($separate) {
     $matrix = $_POST['matrix'] ?? "";
+    if (!is_string($matrix)) {
+        rejectInput('Matrix must be text.');
+    }
     $outputMarkers = array('The system is', 'ERROR:', 'The Eigenvalues');
     $cleanMatrix = $matrix;
     foreach ($outputMarkers as $marker) {
@@ -44,14 +97,29 @@ if ($separate) {
         }
     }
     $matrixInput = trim($cleanMatrix);
+    $fields = [
+        'System (particle sizes)' => [$particleSizes, INPUT_INT_LIST],
+        'Matrix' => [$matrixInput, INPUT_MATRIX_CHARS],
+        'Target distance' => [$targetDistance, INPUT_DECIMAL_OPTIONAL],
+        'Min probability' => [$minProbForState, INPUT_DECIMAL_OPTIONAL],
+        'Target states' => [$targetNumberOfStates, INPUT_INT_OPTIONAL],
+        'Precision' => [$precision, INPUT_INT],
+        'Accuracy boost' => [$accuracyBoost, INPUT_INT],
+    ];
+    validateInputs($fields);
     $matrixRows = substr_count($matrixInput, "\n") + 1;
     error_log("[NSeparator] Executing: particleSizes=$particleSizes, matrixRows=$matrixRows, precision=$precision, accuracyBoost=$accuracyBoost");
-    exec("./NSeparator \"$particleSizes\" \"$matrixInput\" \"$targetDistance\" \"$minProbForState\" \"$targetNumberOfStates\" \"$precision\" \"$accuracyBoost\"", $separatorOutput, $returnValue);
+    $separatorOutput = runBinary(fieldArgv('./NSeparator', $fields), $returnValue);
     error_log("[NSeparator] Completed: exitCode=$returnValue");
     $outputResult = implode("\n", $separatorOutput);
 } elseif ($randomize) {
+    $fields = [
+        'System (particle sizes)' => [$particleSizes, INPUT_INT_LIST],
+        'Precision' => [$precision, INPUT_INT],
+    ];
+    validateInputs($fields);
     error_log("[NRandomizer] Executing: particleSizes=$particleSizes, precision=$precision");
-    exec("./NRandomizer \"$particleSizes\" \"$precision\"", $randomizerOutput, $returnValue);
+    $randomizerOutput = runBinary(fieldArgv('./NRandomizer', $fields), $returnValue);
     error_log("[NRandomizer] Completed: exitCode=$returnValue");
     $matrixInput = implode("\n", $randomizerOutput);
     $outputResult = "Random matrix generated. Click 'Separate' to analyze.";
