@@ -100,7 +100,8 @@ stateseparator/
 │   └── BoundEntanglementState.html
 │
 ├── external/
-│   └── Eigen/                # Eigen linear algebra library (bundled)
+│   ├── README.md             # Which Eigen version is bundled
+│   └── Eigen/                # Eigen 3.3.9 linear algebra library (bundled)
 │
 ├── README.md                 # User documentation
 ├── CONTRIBUTING.md           # This file
