@@ -61,7 +61,7 @@ repos:
       args: ['--style=file', '--fallback-style=Google']
 
 - repo: https://github.com/pocc/pre-commit-hooks
-  rev: v1.3.5
+  rev: v1.4.0
   hooks:
     - id: cppcheck
       args:
