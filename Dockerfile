@@ -30,7 +30,7 @@ RUN make clean && make all SERVER=1
 # Stage 2: Runtime environment with Apache + PHP
 # =============================================================================
 # 8.2.35 fixes CVE-2026-109618/109619. Pinned by digest of the multi-arch index (as of 2026-10-23).
-FROM php:8.2.35-apache-bookworm@sha256:5714c8607608e50d880a5f222fab556edecd4a11b9c50c81fce1c7932c1cf604
+FROM php:8.5.12-apache-bookworm@sha256:5e4418695f9b13b75edefaff547125bf6be267e865931731bdd5946461505736
 
 # Install runtime dependencies (OpenMP runtime library)
 RUN apt-get update && apt-get install -y --no-install-recommends \
