@@ -14,3 +14,10 @@ updates:
       interval: "weekly"
     labels:
       - "maintenance"
+
+  - directory: "/"
+    package-ecosystem: "pre-commit"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "maintenance"
