@@ -118,7 +118,7 @@ NMixedState::NMixedState(const NMixedState& src)
       _Q(src._Q),
       _p(src._p),
       _probs(src._probs),  // Copying the array is not really necessary (allocation would have sufficed), simply for
-                           // completeness
+	                       // completeness
       _startIndex(src._startIndex),
       _lastIndex(src._lastIndex),
       _stateIterators(src._stateIterators.size()),

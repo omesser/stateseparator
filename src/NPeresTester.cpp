@@ -39,7 +39,7 @@ VectorXcd NPeresTester::peresTest(const MatrixXcd& src, const vector<uint>& part
 				ss.str(std::string());
 				for (uint c = 0; c < blockSize; c += stepSize) {
 					for (uint r = c + stepSize; r < blockSize; r += stepSize) {  // Avoid redundent swappings
-						                                                         // Inside the block...
+					                                                             // Inside the block...
 						for (uint block_c = 0; block_c < stepSize; ++block_c) {
 							for (uint block_r = 0; block_r < stepSize; ++block_r) {
 								// Swap original elements:
